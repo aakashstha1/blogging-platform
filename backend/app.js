@@ -14,6 +14,10 @@ app.get("/health", (req, res) => {
   res.send("Health check passed!");
 });
 
+import userRoutes from "./modules/users/user.routes.js";
+
+app.use("/api/v1/users", userRoutes);
+
 app.use(errorHandler);
 
 export default app;
