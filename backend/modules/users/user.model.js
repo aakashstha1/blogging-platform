@@ -2,15 +2,15 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    fullname: {
+    username: {
       type: String,
+      unique: true,
       required: true,
       trim: true,
     },
 
     email: {
       type: String,
-      required: true,
       unique: true,
       trim: true,
       lowercase: true,
@@ -35,6 +35,7 @@ const userSchema = new mongoose.Schema(
     bio: {
       type: String,
       trim: true,
+      maxlength: 300,
     },
 
     bookmarks: [
