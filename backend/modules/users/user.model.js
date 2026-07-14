@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 6,
+      select: false,
     },
 
     role: {
@@ -38,12 +39,10 @@ const userSchema = new mongoose.Schema(
       maxlength: 300,
     },
 
-    bookmarks: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Post",
-      },
-    ],
+    refreshToken: {
+      type: String,
+      select: false,
+    },
   },
   { timestamps: true },
 );
