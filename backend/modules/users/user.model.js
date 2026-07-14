@@ -38,6 +38,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
       maxlength: 300,
     },
+
     refreshToken: {
       type: String,
       select: false,
