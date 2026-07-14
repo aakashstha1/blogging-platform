@@ -1,13 +1,28 @@
 import { ConflictError, NotFoundError } from "../../utils/errors.js";
 import User from "./user.model.js";
+import bcryptjs from "bcryptjs";
 
 export const createUserService = async (userData) => {
-  const existingUser = await User.findOne({ username: userData.username });
+  const { username, email, password } = userData;
+  const existingUser = await User.findOne({
+    $or: [{ username }, { email }],
+  });
   if (existingUser) {
-    throw new ConflictError("User already exists");
+    throw new ConflictError("User already exists with this username or email");
   }
-  const user = await User.create(userData);
-  return user;
+
+  const passwordWithPepper = password + process.env.PEPPER;
+
+  const hashedPassword = await bcryptjs.hash(passwordWithPepper, 10);
+
+  const user = await User.create({
+    ...userData,
+    password: hashedPassword,
+  });
+
+  const { password: _, ...rest } = user.toObject();
+
+  return rest;
 };
 
 export const getUsersService = async (req, res) => {
