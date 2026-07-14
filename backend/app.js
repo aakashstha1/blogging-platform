@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import errMiddleware from "./middlewares/error.middleware";
+import errorHandler from "./middlewares/error.middleware";
 
 const app = express();
 
@@ -14,9 +14,6 @@ app.get("/health", (req, res) => {
   res.send("Health check passed!");
 });
 
-
-
-
-app.use(errMiddleware);
+app.use(errorHandler);
 
 export default app;
