@@ -7,12 +7,14 @@ const userSchema = new mongoose.Schema(
       unique: true,
       required: true,
       trim: true,
+      lowercase: true,
     },
 
     email: {
       type: String,
       unique: true,
       trim: true,
+      required: true,
       lowercase: true,
     },
 
@@ -31,12 +33,14 @@ const userSchema = new mongoose.Schema(
 
     avatar: {
       type: String,
+      default: null,
     },
 
     bio: {
       type: String,
       trim: true,
       maxlength: 300,
+      default: "",
     },
 
     refreshToken: {

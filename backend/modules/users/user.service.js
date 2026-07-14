@@ -1,7 +1,11 @@
-import { NotFoundError } from "../../utils/errors.js";
+import { ConflictError, NotFoundError } from "../../utils/errors.js";
 import User from "./user.model.js";
 
 export const createUserService = async (userData) => {
+  const existingUser = await User.findOne({ username: userData.username });
+  if (existingUser) {
+    throw new ConflictError("User already exists");
+  }
   const user = await User.create(userData);
   return user;
 };
