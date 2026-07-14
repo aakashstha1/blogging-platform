@@ -15,8 +15,10 @@ app.get("/health", (req, res) => {
 });
 
 import userRoutes from "./modules/users/user.routes.js";
+import authRoutes from "./modules/auth/auth.routes.js";
 
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/auth", authRoutes);
 
 app.use(errorHandler);
 
