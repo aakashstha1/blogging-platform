@@ -38,13 +38,10 @@ const userSchema = new mongoose.Schema(
       trim: true,
       maxlength: 300,
     },
-
-    bookmarks: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Post",
-      },
-    ],
+    refreshToken: {
+      type: String,
+      select: false,
+    },
   },
   { timestamps: true },
 );
