@@ -3,8 +3,11 @@ export const validate = (schema) => {
     const result = schema.safeParse(req.body);
 
     if (!result.success) {
+      const firstError = result.error.issues[0];
+
       return res.status(400).json({
-        errors: result.error.issues,
+        message: firstError.message,
+        field: firstError.path[0],
       });
     }
 

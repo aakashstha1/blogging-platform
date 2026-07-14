@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import errorHandler from "./middlewares/error.middleware";
+import errorHandler from "./middlewares/error.middleware.js";
 
 const app = express();
 
@@ -14,8 +14,8 @@ app.get("/health", (req, res) => {
   res.send("Health check passed!");
 });
 
-import userRoutes from "./modules/users/user.routes.js";
-import authRoutes from "./modules/auth/auth.routes.js";
+import userRoutes from "./modules/users/user.route.js";
+import authRoutes from "./modules/auth/auth.route.js";
 
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/auth", authRoutes);
