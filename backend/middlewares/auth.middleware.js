@@ -1,4 +1,5 @@
-import { UnauthorizedError } from "../utils/errors.js";
+import { getUserByIdService } from "../modules/users/user.service.js";
+import { NotFoundError, UnauthorizedError } from "../utils/errors.js";
 import jwt from "jsonwebtoken";
 
 export const isAuthenticated = (req, res, next) => {
@@ -9,9 +10,9 @@ export const isAuthenticated = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decode.id).select("-password");
+    const user = await getUserByIdService(decoded.id).select("-password");
     if (!user) {
-      throw new AppError("User not found", 404);
+      throw new NotFoundError("User not found");
     }
     req.user = user;
     next();
