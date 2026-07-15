@@ -56,3 +56,11 @@ export const deleteUserByIdService = async (userId) => {
   }
   return user;
 };
+
+export const getUserByUsernameService = async (username) => {
+  const user = await User.findOne({ username }).select("+password");
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
+  return user;
+};

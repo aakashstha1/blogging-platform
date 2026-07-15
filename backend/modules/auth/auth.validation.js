@@ -14,12 +14,20 @@ export const registerUserSchema = z.object({
     ),
 
   email: z
-    .email("Invalid email address")
+    .string()
+    .trim()
     .min(1, "Email is required")
+    .email("Invalid email address")
     .transform((email) => email.toLowerCase()),
 
   password: z
     .string()
     .min(1, "Password is required")
     .min(8, "Password must be at least 8 characters"),
+});
+
+export const loginUserSchema = z.object({
+  username: z.string().trim().toLowerCase().min(1, "Username is required"),
+
+  password: z.string().min(1, "Password is required"),
 });
