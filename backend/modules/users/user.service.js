@@ -42,7 +42,32 @@ export const getUserByIdService = async (userId) => {
 };
 
 export const updateUserByIdService = async (userId, updateData) => {
-  const user = await User.findByIdAndUpdate(userId, updateData, { new: true });
+  const { username, email } = updateData;
+
+  if (username) {
+    const existingUser = await User.findOne({
+      username,
+      _id: { $ne: userId },
+    });
+    if (existingUser) {
+      throw new ConflictError("This username is already taken.");
+    }
+  }
+
+  if (email) {
+    const existingUser = await User.findOne({
+      email,
+      _id: { $ne: userId },
+    });
+    if (existingUser) {
+      throw new ConflictError("This email is already registered.");
+    }
+  }
+
+  const user = await User.findByIdAndUpdate(userId, updateData, {
+    returnDocument: "after",
+    runValidators: true,
+  });
   if (!user) {
     throw new NotFoundError("User not found");
   }

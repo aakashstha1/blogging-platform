@@ -25,7 +25,7 @@ export const getUserById = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const user = await updateUserByIdService(req.params.id, req.body);
+    const user = await updateUserByIdService(req.user._id, req.body);
     res.status(200).json(user);
   } catch (err) {
     res.status(500).json({ message: err.message });

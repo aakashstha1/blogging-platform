@@ -36,7 +36,7 @@ export const login = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
   try {
-    await User.findByIdAndUpdate(req.userId, {
+    await User.findByIdAndUpdate(req.user._id, {
       $unset: {
         refreshToken: 1,
       },
