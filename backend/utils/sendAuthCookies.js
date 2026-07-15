@@ -7,7 +7,7 @@ export const sendAuthCookies = (res, accessToken, refreshToken) => {
 
   res.cookie("accessToken", accessToken, {
     ...cookieOptions,
-    maxAge: 3 * 60 * 60 * 1000, 
+    maxAge: 15 * 60 * 60 * 1000, 
   });
 
   res.cookie("refreshToken", refreshToken, {

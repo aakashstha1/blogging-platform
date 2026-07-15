@@ -1,4 +1,4 @@
-import { createPostService } from "./post.service";
+import { createPostService } from "./post.service.js";
 
 export const createPost = async (req, res) => {
   const { title, content, slug, coverImage, categories, tags } = req.body;

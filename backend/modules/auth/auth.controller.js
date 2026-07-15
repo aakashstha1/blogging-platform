@@ -2,7 +2,10 @@ import {
   generateAccessToken,
   generateRefreshToken,
 } from "../../utils/generateTokens.js";
+import { sendAuthCookies } from "../../utils/sendAuthCookies.js";
+import User from "../users/user.model.js";
 import { createUserService } from "../users/user.service.js";
+import { loginUserService, refreshAccessTokenService } from "./auth.service.js";
 
 export const register = async (req, res, next) => {
   try {
@@ -25,7 +28,57 @@ export const login = async (req, res, next) => {
 
     sendAuthCookies(res, accessToken, refreshToken);
 
-    res.status(200).json({ message: "User logged in successfully" });
+    res.status(200).json({ message: "Logged in successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const logout = async (req, res, next) => {
+  try {
+    await User.findByIdAndUpdate(req.userId, {
+      $unset: {
+        refreshToken: 1,
+      },
+    });
+
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+
+    res.status(200).json({
+      message: "Logged out successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getMe = async (req, res) => {
+  res.status(200).json({
+    success: true,
+    user: req.user,
+  });
+};
+
+export const refreshToken = async (req, res, next) => {
+  try {
+    const oldRefreshToken = req.cookies?.refreshToken;
+
+    const user = await refreshAccessTokenService(oldRefreshToken);
+
+    const accessToken = generateAccessToken(user);
+
+    const refreshToken = generateRefreshToken(user);
+
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    sendAuthCookies(res, accessToken, refreshToken);
+
+    res.status(200).json({
+      success: true,
+      message: "Tokens refreshed successfully",
+    });
   } catch (error) {
     next(error);
   }
