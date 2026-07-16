@@ -17,10 +17,12 @@ app.get("/health", (req, res) => {
 import userRoutes from "./modules/users/user.route.js";
 import authRoutes from "./modules/auth/auth.route.js";
 import postRoutes from "./modules/posts/post.route.js";
+import categoryRoutes from "./modules/category/category.route.js";
 
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/posts", postRoutes);
+app.use("/api/v1/category", categoryRoutes);
 
 app.use(errorHandler);
 
