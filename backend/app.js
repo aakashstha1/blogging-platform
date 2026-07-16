@@ -16,7 +16,7 @@ app.get("/health", (req, res) => {
 
 import userRoutes from "./modules/user/user.route.js";
 import authRoutes from "./modules/auth/auth.route.js";
-import postRoutes from "./modules/posts/post.route.js";
+import postRoutes from "./modules/post/post.route.js";
 import categoryRoutes from "./modules/category/category.route.js";
 
 app.use("/api/v1/users", userRoutes);
