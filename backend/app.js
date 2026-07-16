@@ -18,11 +18,13 @@ import userRoutes from "./modules/user/user.route.js";
 import authRoutes from "./modules/auth/auth.route.js";
 import postRoutes from "./modules/post/post.route.js";
 import categoryRoutes from "./modules/category/category.route.js";
+import tagRoutes from "./modules/tag/tag.route.js";
 
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/posts", postRoutes);
-app.use("/api/v1/category", categoryRoutes);
+app.use("/api/v1/categories", categoryRoutes);
+app.use("/api/v1/tags", tagRoutes);
 
 app.use(errorHandler);
 
