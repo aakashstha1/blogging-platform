@@ -14,7 +14,7 @@ app.get("/health", (req, res) => {
   res.send("Health check passed!");
 });
 
-import userRoutes from "./modules/users/user.route.js";
+import userRoutes from "./modules/user/user.route.js";
 import authRoutes from "./modules/auth/auth.route.js";
 import postRoutes from "./modules/posts/post.route.js";
 import categoryRoutes from "./modules/category/category.route.js";
