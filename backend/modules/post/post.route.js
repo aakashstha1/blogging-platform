@@ -15,8 +15,7 @@ import { createPostSchema, updatePostSchema } from "./post.validation.js";
 
 const router = express.Router();
 
-router.get("/", isAuthenticated, getAllPosts);
-
+router.get("/", getAllPosts);
 router.get("/:id", isAuthenticated, getPostById);
 
 router.post(
@@ -36,12 +35,8 @@ router.patch(
   updatePost,
 );
 
-router.patch(
-  "/:id/publish",
-  isAuthenticated,
-  authorizeRoles("user"),
-  publishPost,
-);
+router.patch("/:id/publish", isAuthenticated, publishPost);
+// router.patch("/:id/unpublish", isAuthenticated, unpublishPost);
 
 router.delete("/:id", isAuthenticated, deletePost);
 

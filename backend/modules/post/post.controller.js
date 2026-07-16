@@ -1,11 +1,14 @@
-import { checkOwnership } from "../../helper/checkOwnership.js";
+import {
+  checkOwnership,
+  checkOwnershipOrAdmin,
+} from "../../helper/checkOwnership.js";
 import {
   createPostService,
   getAllPostsService,
   getPostByIdService,
+  incrementViewCountService,
   updatePostService,
   deletePostService,
-  incrementViewCountService,
   publishPostService,
 } from "./post.service.js";
 
@@ -22,8 +25,8 @@ export const createPost = async (req, res, next) => {
 // --------------------------------------------- Get all posts ---------------------------------------------
 export const getAllPosts = async (req, res, next) => {
   try {
-    const posts = await getAllPostsService();
-    res.status(200).json(posts);
+    const result = await getAllPostsService(req.query, req.user);
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
@@ -33,7 +36,7 @@ export const getAllPosts = async (req, res, next) => {
 export const getPostById = async (req, res, next) => {
   try {
     const post = await getPostByIdService(req.params.id, req.user);
-    incrementViewCountService(post._id).catch(() => {}); // fire-and-forget, don't block the response
+    incrementViewCountService(post._id).catch(() => {}); // fire-and-forget
     res.status(200).json(post);
   } catch (error) {
     next(error);
@@ -43,16 +46,10 @@ export const getPostById = async (req, res, next) => {
 // --------------------------------------------- Update post by id ---------------------------------------------
 export const updatePost = async (req, res, next) => {
   try {
-    const post = await getPostByIdService(req.params.id);
-
+    const post = await getPostByIdService(req.params.id, req.user);
     checkOwnership(post.author._id, req.user);
-
     const updatedPost = await updatePostService(post, req.body, req.file);
-
-    res.status(200).json({
-      message: "Post updated successfully",
-      updatedPost,
-    });
+    res.status(200).json({ message: "Post updated successfully", updatedPost });
   } catch (error) {
     next(error);
   }
@@ -61,15 +58,10 @@ export const updatePost = async (req, res, next) => {
 // --------------------------------------------- Delete post by id ---------------------------------------------
 export const deletePost = async (req, res, next) => {
   try {
-    const post = await getPostByIdService(req.params.id);
-
-    checkOwnership(post.author, req.user);
-
-    await deletePostService(req.params.id);
-
-    res.status(200).json({
-      message: "Post deleted successfully",
-    });
+    const post = await getPostByIdService(req.params.id, req.user);
+    checkOwnershipOrAdmin(post.author._id, req.user);
+    await deletePostService(post);
+    res.status(200).json({ message: "Post deleted successfully" });
   } catch (error) {
     next(error);
   }
@@ -79,13 +71,23 @@ export const deletePost = async (req, res, next) => {
 export const publishPost = async (req, res, next) => {
   try {
     const post = await getPostByIdService(req.params.id, req.user);
-
-    const updatedPost = await publishPostService(post, req.user);
-    res.status(200).json({
-      message: "Post updated successfully",
-      updatedPost,
-    });
+    checkOwnership(post.author._id, req.user);
+    const updatedPost = await publishPostService(post);
+    res
+      .status(200)
+      .json({ message: "Post published successfully", updatedPost });
   } catch (error) {
     next(error);
   }
 };
+
+// export const unpublishPost = async (req, res, next) => {
+//   try {
+//     const post = await getPostByIdService(req.params.id, req.user);
+//     checkOwnership(post.author._id, req.user);
+//     const updatedPost = await unpublishPostService(post);
+//     res.status(200).json({ message: "Post moved back to draft", updatedPost });
+//   } catch (error) {
+//     next(error);
+//   }
+// };

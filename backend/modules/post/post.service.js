@@ -1,4 +1,3 @@
-import { checkOwnership } from "../../helper/checkOwnership.js";
 import { deleteImageFromCloudinary } from "../../helper/cloudinaryDelete.js";
 import { BadRequestError, NotFoundError } from "../../utils/errors.js";
 import Post from "./post.model.js";
@@ -9,38 +8,69 @@ const DRAFT_LIMIT_MESSAGE =
 
 // --------------------------------------------- Create a new post ---------------------------------------------
 export const createPostService = async (userId, postData, file) => {
-  if (!file) {
-    throw new BadRequestError("Cover image is required");
-  }
+  if (!file) throw new BadRequestError("Cover image is required");
 
-  if (postData.status !== "published") {
+  const status = postData.status || "draft";
+
+  if (status === "draft") {
     await assertNoExistingDraft(userId);
   }
 
   const slug = await buildUniqueSlug(postData.title);
 
-  return await Post.create({
-    ...postData,
-    slug,
-    author: userId,
-    coverImage: file.path,
-    coverImagePublicId: file.filename,
-    publishedAt: postData.status === "published" ? new Date() : null,
-  });
+  try {
+    return await Post.create({
+      ...postData,
+      slug,
+      author: userId,
+      coverImage: file.path,
+      coverImagePublicId: file.filename,
+      status,
+      publishedAt: status === "published" ? new Date() : null,
+    });
+  } catch (error) {
+    if (error.code === 11000 && error.keyPattern?.status) {
+      throw new BadRequestError(DRAFT_LIMIT_MESSAGE);
+    }
+    throw error;
+  }
 };
 
 // --------------------------------------------- Get all posts ---------------------------------------------
-export const getAllPostsService = async () => {
-  const posts = await Post.find()
-    .populate("author", "username")
-    .populate("categories", "name")
-    .populate("tags", "name")
-    .sort({ createdAt: -1 });
 
-  if (posts.length === 0) {
-    throw new NotFoundError("No posts found");
+export const getAllPostsService = async (query, user) => {
+  const page = Math.max(parseInt(query.page) || 1, 1);
+  const limit = Math.min(parseInt(query.limit) || 10, 50);
+  const skip = (page - 1) * limit;
+
+  const filter = {};
+  if (!user) {
+    filter.status = "published";
+  } else if (user.role !== "admin") {
+    filter.$or = [{ status: "published" }, { author: user._id }];
   }
-  return posts;
+
+  if (query.category) filter.categories = query.category;
+  if (query.search) filter.$text = { $search: query.search };
+  if (query.status && user?.role === "admin") filter.status = query.status;
+
+  const [posts, total] = await Promise.all([
+    Post.find(filter)
+      .populate("author", "username")
+      .populate("categories", "name")
+      .populate("tags", "name")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    Post.countDocuments(filter),
+  ]);
+
+  return {
+    posts,
+    page,
+    totalPages: Math.ceil(total / limit) || 1,
+    totalPosts: total,
+  };
 };
 
 // --------------------------------------------- Get a post by ID ---------------------------------------------
@@ -50,65 +80,76 @@ export const getPostByIdService = async (postId, user = null) => {
     .populate("categories", "name")
     .populate("tags", "name");
 
-  if (!post) {
-    throw new NotFoundError("Post not found");
-  }
+  if (!post) throw new NotFoundError("Post not found");
+
   const isOwner = user && post.author._id.toString() === user._id.toString();
   const isAdmin = user?.role === "admin";
   if (post.status !== "published" && !isOwner && !isAdmin) {
+    // 404, not 403 — don't reveal that a draft exists to non-owners
     throw new NotFoundError("Post not found");
   }
+
   return post;
+};
+
+// --------------------------------------------- Increment view count ---------------------------------------------
+export const incrementViewCountService = async (postId) => {
+  await Post.findByIdAndUpdate(postId, { $inc: { viewsCount: 1 } });
 };
 
 // --------------------------------------------- Update a post by ID ---------------------------------------------
 export const updatePostService = async (post, updateData, file) => {
-  const { title } = updateData;
-
-  if (title) {
-    updateData.slug = await buildUniqueSlug(title, post._id);
+  if (updateData.title) {
+    updateData.slug = await buildUniqueSlug(updateData.title, post._id);
   }
 
   if (file) {
-    await deleteImageFromCloudinary(post.coverImagePublicId);
-
+    if (post.coverImagePublicId) {
+      await deleteImageFromCloudinary(post.coverImagePublicId);
+    }
     updateData.coverImage = file.path;
     updateData.coverImagePublicId = file.filename;
   }
 
-  if (post.status === "published" && updateData.status === "draft") {
-    throw new BadRequestError("Published posts cannot be reverted to draft");
-  }
-
   return await Post.findByIdAndUpdate(post._id, updateData, {
-    returnDocument: "after",
+    new: true,
     runValidators: true,
   });
 };
 
 // --------------------------------------------- Delete a post by ID ---------------------------------------------
-export const deletePostService = async (postId) => {
-  const post = await getPostByIdService(postId);
-
+export const deletePostService = async (post) => {
   if (post.coverImagePublicId) {
     await deleteImageFromCloudinary(post.coverImagePublicId);
   }
-
-  await Post.findByIdAndDelete(postId);
+  await Post.findByIdAndDelete(post._id);
 };
 
-// --------------------------------------------- Publish a post by ID ---------------------------------------------
-export const publishPostService = async (post, user) => {
+// --------------------------------------------- Publish a post ---------------------------------------------
+export const publishPostService = async (post) => {
   if (post.status === "published") {
     throw new BadRequestError("Post is already published");
   }
-  checkOwnership(post.author._id, user);
 
   post.status = "published";
   post.publishedAt = new Date();
   await post.save();
   return post;
 };
+
+// --------------------------------------------- Revert a post to draft ---------------------------------------------
+// export const unpublishPostService = async (post) => {
+//   if (post.status === "draft") {
+//     throw new BadRequestError("Post is already a draft");
+//   }
+
+//   await assertNoExistingDraft(post.author._id, post._id);
+
+//   post.status = "draft";
+//   post.publishedAt = null;
+//   await post.save();
+//   return post;
+// };
 
 // --------------------------------------------- Assert no existing draft ---------------------------------------------
 const assertNoExistingDraft = async (userId, excludePostId = null) => {
@@ -125,9 +166,4 @@ const buildUniqueSlug = async (title, excludeId = null) => {
   const filter = excludeId ? { slug, _id: { $ne: excludeId } } : { slug };
   if (await Post.findOne(filter)) slug = `${slug}-${Date.now()}`;
   return slug;
-};
-
-// --------------------------------------------- Increment view count ---------------------------------------------
-export const incrementViewCountService = async (postId) => {
-  await Post.findByIdAndUpdate(postId, { $inc: { viewsCount: 1 } });
 };

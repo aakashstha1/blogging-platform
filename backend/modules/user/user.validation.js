@@ -24,7 +24,5 @@ export const updateUserSchema = z
       .trim()
       .max(300, "Bio cannot exceed 300 characters")
       .optional(),
-
-    avatar: z.string().url("Avatar must be a valid URL").optional(),
   })
   .strict();

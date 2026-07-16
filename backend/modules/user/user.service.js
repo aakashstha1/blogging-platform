@@ -45,15 +45,21 @@ export const getUserByIdService = async (userId) => {
 export const updateUserByIdService = async (userId, updateData, file) => {
   const user = await getUserByIdService(userId);
 
-  const { username, email } = updateData;
+  const allowedFields = ["username", "email", "bio"];
+
+  const filteredData = Object.fromEntries(
+    Object.entries(updateData).filter(([key]) => allowedFields.includes(key)),
+  );
+
+  const { username, email } = filteredData;
 
   if (file) {
     if (user.avatarPublicId) {
       await deleteImageFromCloudinary(user.avatarPublicId);
     }
 
-    updateData.avatar = file.path;
-    updateData.avatarPublicId = file.filename;
+    filteredData.avatar = file.path;
+    filteredData.avatarPublicId = file.filename;
   }
 
   if (username) {
@@ -61,6 +67,7 @@ export const updateUserByIdService = async (userId, updateData, file) => {
       username,
       _id: { $ne: userId },
     });
+
     if (existingUser) {
       throw new ConflictError("This username is already taken.");
     }
@@ -71,17 +78,16 @@ export const updateUserByIdService = async (userId, updateData, file) => {
       email,
       _id: { $ne: userId },
     });
+
     if (existingUser) {
       throw new ConflictError("This email is already registered.");
     }
   }
 
-  const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
-    returnDocument: "after",
+  return await User.findByIdAndUpdate(userId, filteredData, {
+    new: true,
     runValidators: true,
   });
-
-  return updatedUser;
 };
 
 export const deleteUserByIdService = async (userId) => {

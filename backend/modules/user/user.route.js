@@ -9,18 +9,19 @@ import { authorizeRoles } from "../../middlewares/role.middleware.js";
 import { isAuthenticated } from "../../middlewares/auth.middleware.js";
 import { validate } from "../../middlewares/validate.middleware.js";
 import { updateUserSchema } from "./user.validation.js";
+import { upload } from "../../middlewares/upload.middleware.js";
 
 const router = express.Router();
 
 router.get("/", isAuthenticated, authorizeRoles("admin"), getUsers);
-router.get("/:id", getUserById);
+router.get("/:id", isAuthenticated, getUserById);
 router.patch(
   "/profile",
-  validate(updateUserSchema),
   isAuthenticated,
-  authorizeRoles("user"),
+  upload.single("avatar"),
+  validate(updateUserSchema),
   updateUser,
 );
-router.delete("/:id", isAuthenticated, authorizeRoles("user"), deleteUser);
+router.delete("/:id", isAuthenticated, authorizeRoles("admin"), deleteUser);
 
 export default router;
