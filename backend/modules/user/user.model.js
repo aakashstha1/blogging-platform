@@ -36,6 +36,11 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
+    avatarPublicId: {
+      type: String,
+      default: null,
+    },
+
     bio: {
       type: String,
       trim: true,

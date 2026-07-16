@@ -6,6 +6,8 @@ const postSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      minlength: 3,
+      maxlength: 200,
     },
 
     content: {
@@ -22,6 +24,11 @@ const postSchema = new mongoose.Schema(
     },
 
     coverImage: {
+      type: String,
+      required: true,
+    },
+
+    coverImagePublicId: {
       type: String,
       required: true,
     },
@@ -43,6 +50,7 @@ const postSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["draft", "published"],
+      default: "draft",
     },
 
     author: {
@@ -56,17 +64,19 @@ const postSchema = new mongoose.Schema(
       default: 0,
     },
 
-    commentsCount: {
-      type: Number,
-      default: 0,
-    },
-
-    likesCount: {
-      type: Number,
-      default: 0,
+    publishedAt: {
+      type: Date,
+      default: null,
     },
   },
   { timestamps: true },
+);
+
+postSchema.index({ title: "text", content: "text" });
+
+postSchema.index(
+  { author: 1, status: 1 },
+  { unique: true, partialFilterExpression: { status: "draft" } },
 );
 
 export default mongoose.model("Post", postSchema);

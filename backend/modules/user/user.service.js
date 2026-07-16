@@ -1,3 +1,4 @@
+import { deleteImageFromCloudinary } from "../../helper/cloudinaryDelete.js";
 import { ConflictError, NotFoundError } from "../../utils/errors.js";
 import User from "./user.model.js";
 import bcryptjs from "bcryptjs";
@@ -41,8 +42,19 @@ export const getUserByIdService = async (userId) => {
   return user;
 };
 
-export const updateUserByIdService = async (userId, updateData) => {
+export const updateUserByIdService = async (userId, updateData, file) => {
+  const user = await getUserByIdService(userId);
+
   const { username, email } = updateData;
+
+  if (file) {
+    if (user.avatarPublicId) {
+      await deleteImageFromCloudinary(user.avatarPublicId);
+    }
+
+    updateData.avatar = file.path;
+    updateData.avatarPublicId = file.filename;
+  }
 
   if (username) {
     const existingUser = await User.findOne({
@@ -64,22 +76,22 @@ export const updateUserByIdService = async (userId, updateData) => {
     }
   }
 
-  const user = await User.findByIdAndUpdate(userId, updateData, {
+  const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
     returnDocument: "after",
     runValidators: true,
   });
-  if (!user) {
-    throw new NotFoundError("User not found");
-  }
-  return user;
+
+  return updatedUser;
 };
 
 export const deleteUserByIdService = async (userId) => {
-  const user = await User.findByIdAndDelete(userId);
-  if (!user) {
-    throw new NotFoundError("User not found");
+  const user = await getUserByIdService(userId);
+
+  if (user.avatarPublicId) {
+    await deleteImageFromCloudinary(user.avatarPublicId);
   }
-  return user;
+
+  await User.findByIdAndDelete(userId);
 };
 
 export const getUserByUsernameService = async (username) => {

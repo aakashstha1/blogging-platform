@@ -5,27 +5,44 @@ import {
   getPostById,
   updatePost,
   deletePost,
+  publishPost,
 } from "./post.controller.js";
 import { isAuthenticated } from "../../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../../middlewares/role.middleware.js";
 import { upload } from "../../middlewares/upload.middleware.js";
+import { validate } from "../../middlewares/validate.middleware.js";
+import { createPostSchema, updatePostSchema } from "./post.validation.js";
 
 const router = express.Router();
+
+router.get("/", isAuthenticated, getAllPosts);
+
+router.get("/:id", isAuthenticated, getPostById);
 
 router.post(
   "/",
   isAuthenticated,
   authorizeRoles("user"),
-  upload.single("coverImg"),
+  upload.single("coverImage"),
+  validate(createPostSchema),
   createPost,
 );
 
-router.get("/", getAllPosts);
+router.patch(
+  "/:id",
+  isAuthenticated,
+  upload.single("coverImage"),
+  validate(updatePostSchema),
+  updatePost,
+);
 
-router.get("/:id", getPostById);
+router.patch(
+  "/:id/publish",
+  isAuthenticated,
+  authorizeRoles("user"),
+  publishPost,
+);
 
-router.patch("/:id", updatePost);
-
-router.delete("/:id", deletePost);
+router.delete("/:id", isAuthenticated, deletePost);
 
 export default router;

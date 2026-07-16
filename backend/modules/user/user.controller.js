@@ -5,38 +5,38 @@ import {
   updateUserByIdService,
 } from "./user.service.js";
 
-export const getUsers = async (req, res) => {
+export const getUsers = async (req, res, next) => {
   try {
     const users = await getUsersService();
     res.status(200).json(users);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    next(error);
   }
 };
 
-export const getUserById = async (req, res) => {
+export const getUserById = async (req, res, next) => {
   try {
     const user = await getUserByIdService(req.params.id);
     res.status(200).json(user);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    next(error);
   }
 };
 
-export const updateUser = async (req, res) => {
+export const updateUser = async (req, res, next) => {
   try {
-    const user = await updateUserByIdService(req.user._id, req.body);
+    const user = await updateUserByIdService(req.user._id, req.body, req.file);
     res.status(200).json(user);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    next(error);
   }
 };
 
-export const deleteUser = async (req, res) => {
+export const deleteUser = async (req, res, next) => {
   try {
     const user = await deleteUserByIdService(req.params.id);
-    res.status(200).json(user);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    next(error);
   }
 };
