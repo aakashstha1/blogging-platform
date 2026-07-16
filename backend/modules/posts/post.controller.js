@@ -8,7 +8,10 @@ import {
 
 export const createPost = async (req, res, next) => {
   try {
-    const post = await createPostService(req.user._id, req.body);
+    const post = await createPostService(req.user._id, {
+      ...req.body,
+      coverImg: req.file?.path,
+    });
     res.status(201).json({ message: "Post created successfully", post });
   } catch (error) {
     next(error);

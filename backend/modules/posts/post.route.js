@@ -8,10 +8,17 @@ import {
 } from "./post.controller.js";
 import { isAuthenticated } from "../../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../../middlewares/role.middleware.js";
+import { upload } from "../../middlewares/upload.middleware.js";
 
 const router = express.Router();
 
-router.post("/", isAuthenticated, authorizeRoles("user"), createPost);
+router.post(
+  "/",
+  isAuthenticated,
+  authorizeRoles("user"),
+  upload.single("coverImg"),
+  createPost,
+);
 
 router.get("/", getAllPosts);
 

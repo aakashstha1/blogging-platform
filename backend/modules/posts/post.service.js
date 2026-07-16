@@ -2,14 +2,22 @@ import Post from "./post.model.js";
 import slugify from "slugify";
 
 export const createPostService = async (userId, postData) => {
-  const slug = slugify(postData.title, {
+  let slug = slugify(postData.title, {
     lower: true,
     strict: true,
   });
 
-  postData.slug = slug;
-  postData.author = userId;
-  return await Post.create(postData);
+  const existingPost = await Post.findOne({ slug });
+
+  if (existingPost) {
+    slug = `${slug}-${Date.now()}`;
+  }
+
+  return await Post.create({
+    ...postData,
+    slug,
+    author: userId,
+  });
 };
 
 export const getAllPostsService = async () => {
