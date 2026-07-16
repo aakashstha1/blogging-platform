@@ -3,8 +3,8 @@ import {
   generateRefreshToken,
 } from "../../utils/generateTokens.js";
 import { sendAuthCookies } from "../../utils/sendAuthCookies.js";
-import User from "../users/user.model.js";
-import { createUserService } from "../users/user.service.js";
+import User from "../user/user.model.js";
+import { createUserService } from "../user/user.service.js";
 import { loginUserService, refreshAccessTokenService } from "./auth.service.js";
 
 export const register = async (req, res, next) => {

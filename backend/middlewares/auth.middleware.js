@@ -1,4 +1,4 @@
-import { getUserByIdService } from "../modules/users/user.service.js";
+import { getUserByIdService } from "../modules/user/user.service.js";
 import { NotFoundError, UnauthorizedError } from "../utils/errors.js";
 import jwt from "jsonwebtoken";
 

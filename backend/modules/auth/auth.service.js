@@ -1,7 +1,7 @@
 import { NotFoundError, UnauthorizedError } from "../../utils/errors.js";
-import { getUserByUsernameService } from "../users/user.service.js";
+import { getUserByUsernameService } from "../user/user.service.js";
 import bcryptjs from "bcryptjs";
-import User from "../users/user.model.js";
+import User from "../user/user.model.js";
 import jwt from "jsonwebtoken";
 
 export const loginUserService = async (loginData) => {
