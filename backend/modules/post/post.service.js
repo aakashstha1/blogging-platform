@@ -92,11 +92,6 @@ export const getPostByIdService = async (postId, user = null) => {
   return post;
 };
 
-// --------------------------------------------- Increment view count ---------------------------------------------
-export const incrementViewCountService = async (postId) => {
-  await Post.findByIdAndUpdate(postId, { $inc: { viewsCount: 1 } });
-};
-
 // --------------------------------------------- Update a post by ID ---------------------------------------------
 export const updatePostService = async (post, updateData, file) => {
   if (updateData.title) {
