@@ -1,6 +1,6 @@
-import { getCommentCountsForPostsService } from "../comment/comment.service.js";
-import { getPostLikeCountsService } from "../like/like.service.js";
 import Post from "../post/post.model.js";
+import { getPostLikeCountsService } from "../like/like.service.js";
+import { getCommentCountsForPostsService } from "../comment/comment.service.js";
 
 // Higher gravity = old posts fall off the trending list faster.
 // 1.5-1.8 is the classic Hacker News range; tune to taste.
@@ -55,7 +55,12 @@ export const getTrendingPostsService = async (limit = 10) => {
     };
   });
 
-  scored.sort((a, b) => b.hotScore - a.hotScore);
+  scored.sort((a, b) => {
+    if (b.hotScore !== a.hotScore) return b.hotScore - a.hotScore;
+    // Tiebreaker for equal scores (commonly all-zero-engagement posts) —
+    // fall back to newest first rather than arbitrary DB order.
+    return new Date(b.post.publishedAt) - new Date(a.post.publishedAt);
+  });
 
   return scored.slice(0, limit);
 };
