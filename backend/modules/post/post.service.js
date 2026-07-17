@@ -177,3 +177,24 @@ const buildUniqueSlug = async (title, excludeId = null) => {
   if (await Post.findOne(filter)) slug = `${slug}-${Date.now()}`;
   return slug;
 };
+
+// ------------------------------------- search posts -------------------------------------
+export const searchPostsService = async (query) => {
+  if (!query?.trim()) {
+    throw new BadRequestError("Search query is required");
+  }
+
+  return await Post.find(
+    {
+      status: "published",
+      $text: { $search: query },
+    },
+    {
+      score: { $meta: "textScore" },
+    },
+  )
+    .sort({ score: { $meta: "textScore" } })
+    .populate("author", "username")
+    .populate("categories", "name")
+    .populate("tags", "name");
+};
