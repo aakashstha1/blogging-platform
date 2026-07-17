@@ -36,7 +36,7 @@ export const getAllPosts = async (req, res, next) => {
 export const getPostById = async (req, res, next) => {
   try {
     const post = await getPostByIdService(req.params.id, req.user);
-    recordViewService(req.user?._id, result.post._id).catch(() => {});
+    recordViewService(req.user?._id, post._id).catch(() => {});
     res.status(200).json(post);
   } catch (error) {
     next(error);
