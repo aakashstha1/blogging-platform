@@ -1,32 +1,38 @@
-import { getPostsCommentedByUserService } from "../comment/comment.service.js";
-import { getMyLikedPostsService } from "../like/like.service.js";
 import Post from "../post/post.model.js";
-import { getTrendingPostsService } from "../trending/trending.service.js";
 import { getRecentlyViewedPostsService } from "../view/view.service.js";
-import { buildCorpusVectors, buildDocumentText, cosineSimilarity } from "./recommendation.tfidf.js";
+import { getMyLikedPostsService } from "../like/like.service.js";
+import { getPostsCommentedByUserService } from "../comment/comment.service.js";
+import { getTrendingPostsService } from "../trending/trending.service.js";
+import { cosineSimilarityWithNorms } from "./recommendation.tfidf.js";
 
-// How much of each source of interest to pull for the profile.
 const RECENT_VIEWS_TO_CONSIDER = 10;
 const RECENT_LIKES_TO_CONSIDER = 20;
 const RECENT_COMMENTS_TO_CONSIDER = 20;
 
 // Commenting takes real effort (strongest signal), liking is a single tap
-// (medium signal), viewing costs the reader nothing (weakest signal but
-// still meaningful — it's the only signal every user generates).
+// (medium signal), viewing costs the reader nothing (weakest but still
+// meaningful signal).
 const SIGNAL_WEIGHT = {
   view: 1.0,
   like: 1.5,
   comment: 1.8,
 };
 
-// Builds a deduped map of postId -> { post, weight }, keeping the HIGHEST
-// weight when a post shows up under multiple signals (e.g. viewed AND liked).
+const toPlainVector = (mapOrObject) => {
+  if (!mapOrObject) return {};
+  // .lean() queries return plain objects already; hydrated Mongoose docs
+  // return a Map — handle both without caring which one we got.
+  return mapOrObject instanceof Map
+    ? Object.fromEntries(mapOrObject)
+    : mapOrObject;
+};
+
 const buildUserProfile = (viewedPosts, likedPosts, commentedPosts) => {
   const profile = new Map();
 
   const addAll = (posts, weight) => {
     for (const post of posts) {
-      if (!post) continue;
+      if (!post || !post.vectorNorm) continue; // skip posts with no vector yet
       const id = post._id.toString();
       const existing = profile.get(id);
       if (!existing || weight > existing.weight) {
@@ -56,55 +62,77 @@ export const getRecommendedPostsService = async (userId, limit = 10) => {
   const profile = buildUserProfile(viewedPosts, likedPosts, commentedPosts);
   const profilePostIds = new Set(profile.map((p) => p.post._id.toString()));
 
-  // New user with no engagement of any kind — nothing to base a
-  // recommendation on. Fall back to trending rather than an empty list.
+  // No engagement (or engagement only on posts without a vector yet, e.g.
+  // brand new) — fall back to trending.
   if (profile.length === 0) {
     const trending = await getTrendingPostsService(limit);
     return trending.map((t) => t.post);
   }
 
-  // Candidate pool: all published posts NOT already in the user's profile
-  // (already viewed/liked/commented on — no point recommending it again).
-  const candidates = await Post.find({
+  // Narrow the candidate pool to posts sharing at least one category with
+  // the user's profile — most posts outside these categories are extremely
+  // unlikely to be good recommendations anyway, and this keeps the query
+  // (and the number of similarity comparisons) small regardless of total
+  // corpus size.
+  const profileCategoryIds = [
+    ...new Set(
+      profile.flatMap((p) =>
+        (p.post.categories || []).map((c) => c._id?.toString() || c.toString()),
+      ),
+    ),
+  ];
+
+  const candidateFilter = {
     status: "published",
     _id: { $nin: [...profilePostIds] },
-  })
+    vectorNorm: { $gt: 0 }, // only posts that actually have a vector computed
+  };
+  if (profileCategoryIds.length > 0) {
+    candidateFilter.categories = { $in: profileCategoryIds };
+  }
+
+  // .lean() — we only need plain data for math, no need to hydrate full
+  // Mongoose documents. Also no `content` field selected at all here.
+  const candidates = await Post.find(candidateFilter)
+    .select(
+      "title slug coverImage viewsCount publishedAt author categories tfidfVector vectorNorm",
+    )
     .populate("author", "username")
     .populate("categories", "name")
-    .select(
-      "title slug coverImage viewsCount publishedAt author categories content",
-    );
+    .lean();
 
-  if (candidates.length === 0) return [];
+  if (candidates.length === 0) {
+    const trending = await getTrendingPostsService(limit);
+    return trending.map((t) => t.post);
+  }
 
-  // Build TF-IDF over the combined set (profile posts + candidates) so IDF
-  // weighting reflects the whole corpus, not just one side.
-  const profileDocs = profile.map((p) => p.post);
-  const allDocs = [...profileDocs, ...candidates];
-  const allTexts = allDocs.map(buildDocumentText);
-  const vectors = buildCorpusVectors(allTexts);
+  const profileVectors = profile.map((p) => ({
+    vector: toPlainVector(p.post.tfidfVector),
+    norm: p.post.vectorNorm,
+    weight: p.weight,
+  }));
 
-  const profileVectors = vectors.slice(0, profileDocs.length);
-  const candidateVectors = vectors.slice(profileDocs.length);
+  const scored = candidates.map((post) => {
+    const candidateVector = toPlainVector(post.tfidfVector);
+    const candidateNorm = post.vectorNorm;
 
-  const scored = candidates.map((post, i) => {
-    // Best WEIGHTED match across the whole profile — a candidate similar to
-    // something the user commented on outranks one merely similar to
-    // something they glanced at.
-    const bestScore = Math.max(
-      ...profile.map(
-        (entry, j) =>
-          cosineSimilarity(profileVectors[j], candidateVectors[i]) *
-          entry.weight,
-      ),
-    );
+    let bestScore = 0;
+    for (const entry of profileVectors) {
+      const similarity = cosineSimilarityWithNorms(
+        entry.vector,
+        entry.norm,
+        candidateVector,
+        candidateNorm,
+      );
+      const weighted = similarity * entry.weight;
+      if (weighted > bestScore) bestScore = weighted;
+    }
+
     return { post, score: bestScore };
   });
 
   scored.sort((a, b) => b.score - a.score);
 
-  // If nothing scored above zero (no shared vocabulary at all), fall back
-  // to trending rather than showing 0%-match posts as if they were relevant.
   const meaningful = scored.filter((s) => s.score > 0);
   if (meaningful.length === 0) {
     const trending = await getTrendingPostsService(limit);

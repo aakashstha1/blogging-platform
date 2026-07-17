@@ -68,6 +68,15 @@ const postSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    tfidfVector: {
+      type: Map,
+      of: Number,
+      default: undefined,
+    },
+    vectorNorm: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true },
 );

@@ -70,7 +70,7 @@ const STOPWORDS = new Set([
   "over",
 ]);
 
-const tokenize = (text) => {
+export const tokenize = (text) => {
   return (text || "")
     .toLowerCase()
     .replace(/<[^>]+>/g, " ") // strip HTML tags if content is rich-text
@@ -88,7 +88,7 @@ export const buildDocumentText = (post) => {
   return `${post.title} ${post.title} ${categoryNames} ${post.content}`;
 };
 
-const termFrequency = (tokens) => {
+export const termFrequency = (tokens) => {
   const tf = {};
   for (const token of tokens) {
     tf[token] = (tf[token] || 0) + 1;
@@ -148,4 +148,24 @@ export const cosineSimilarity = (vecA, vecB) => {
 
   if (normA === 0 || normB === 0) return 0;
   return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+};
+
+// Faster variant for the hot path: norms are already known (precomputed and
+// stored alongside each vector), so this only has to do a dot product —
+// and it iterates the SMALLER object's keys rather than building a Set
+// over the union of both, since most term overlaps are partial.
+export const cosineSimilarityWithNorms = (vecA, normA, vecB, normB) => {
+  if (!normA || !normB) return 0;
+
+  const [smaller, larger] =
+    Object.keys(vecA).length < Object.keys(vecB).length
+      ? [vecA, vecB]
+      : [vecB, vecA];
+
+  let dot = 0;
+  for (const term in smaller) {
+    if (larger[term]) dot += smaller[term] * larger[term];
+  }
+
+  return dot / (normA * normB);
 };

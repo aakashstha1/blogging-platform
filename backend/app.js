@@ -23,6 +23,7 @@ import likeRoutes from "./modules/like/like.route.js";
 import commentRoutes from "./modules/comment/comment.route.js";
 import viewRoutes from "./modules/view/view.route.js";
 import trendingRoutes from "./modules/trending/trending.route.js";
+import recommendationRoutes from "./modules/recommendation/recommendation.route.js";
 
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/auth", authRoutes);
@@ -33,6 +34,7 @@ app.use("/api/v1/likes", likeRoutes);
 app.use("/api/v1/comments", commentRoutes);
 app.use("/api/v1/views", viewRoutes);
 app.use("/api/v1/trending", trendingRoutes);
+app.use("/api/v1/recommendation", recommendationRoutes);
 
 app.use(errorHandler);
 
