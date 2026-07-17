@@ -72,9 +72,11 @@ const postSchema = new mongoose.Schema(
       type: Map,
       of: Number,
       default: undefined,
+      select: false,
     },
     vectorNorm: {
       type: Number,
+      select: false,
       default: 0,
     },
   },

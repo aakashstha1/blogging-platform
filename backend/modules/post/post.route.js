@@ -6,7 +6,6 @@ import {
   updatePost,
   deletePost,
   publishPost,
-  searchPosts,
 } from "./post.controller.js";
 import { isAuthenticated } from "../../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../../middlewares/role.middleware.js";
@@ -49,6 +48,5 @@ router.patch("/:id/publish", isAuthenticated, publishPost);
 // router.patch("/:id/unpublish", isAuthenticated, unpublishPost);
 
 router.delete("/:id", isAuthenticated, deletePostRateLimiter, deletePost);
-router.get("/search", searchPosts);
 
 export default router;

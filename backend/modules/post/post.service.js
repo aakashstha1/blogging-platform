@@ -2,6 +2,7 @@ import { deleteImageFromCloudinary } from "../../helper/cloudinaryDelete.js";
 import { updateSinglePostVectorService } from "../../services/vectorize.service.js";
 import { BadRequestError, NotFoundError } from "../../utils/errors.js";
 import Post from "./post.model.js";
+import Category from "../category/category.model.js";
 import slugify from "slugify";
 
 const DRAFT_LIMIT_MESSAGE =
@@ -58,18 +59,38 @@ export const getAllPostsService = async (query, user) => {
     filter.$or = [{ status: "published" }, { author: user._id }];
   }
 
-  if (query.category) filter.categories = query.category;
+  const category = await Category.findOne({
+    slug: query.category,
+  });
+
+  if (!category) {
+    return {
+      posts: [],
+      page: 1,
+      totalPages: 1,
+      totalPosts: 0,
+    };
+  }
+
+  filter.categories = category._id;
   if (query.search) filter.$text = { $search: query.search };
   if (query.status && user?.role === "admin") filter.status = query.status;
 
+  const findQuery = Post.find(filter)
+    .populate("author", "username")
+    .populate("categories", "name")
+    .populate("tags", "name")
+    .skip(skip)
+    .limit(limit);
+
+  if (query.search) {
+    findQuery.sort({ score: { $meta: "textScore" } });
+  } else {
+    findQuery.sort({ publishedAt: -1, createdAt: -1 });
+  }
+
   const [posts, total] = await Promise.all([
-    Post.find(filter)
-      .populate("author", "username")
-      .populate("categories", "name")
-      .populate("tags", "name")
-      .sort({ publishedAt: -1 }, { createdAt: -1 })
-      .skip(skip)
-      .limit(limit),
+    findQuery,
     Post.countDocuments(filter),
   ]);
 
@@ -176,25 +197,4 @@ const buildUniqueSlug = async (title, excludeId = null) => {
   const filter = excludeId ? { slug, _id: { $ne: excludeId } } : { slug };
   if (await Post.findOne(filter)) slug = `${slug}-${Date.now()}`;
   return slug;
-};
-
-// ------------------------------------- search posts -------------------------------------
-export const searchPostsService = async (query) => {
-  if (!query?.trim()) {
-    throw new BadRequestError("Search query is required");
-  }
-
-  return await Post.find(
-    {
-      status: "published",
-      $text: { $search: query },
-    },
-    {
-      score: { $meta: "textScore" },
-    },
-  )
-    .sort({ score: { $meta: "textScore" } })
-    .populate("author", "username")
-    .populate("categories", "name")
-    .populate("tags", "name");
 };

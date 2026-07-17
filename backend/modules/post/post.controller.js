@@ -10,7 +10,6 @@ import {
   updatePostService,
   deletePostService,
   publishPostService,
-  searchPostsService,
 } from "./post.service.js";
 
 // --------------------------------------------- Create a new post ---------------------------------------------
@@ -92,13 +91,3 @@ export const publishPost = async (req, res, next) => {
 //     next(error);
 //   }
 // };
-
-// ----------------------------------------- Search posts -----------------------------------------
-export const searchPosts = async (req, res, next) => {
-  try {
-    const posts = await searchPostsService(req.query.query);
-    res.status(200).json({ posts });
-  } catch (error) {
-    next(error);
-  }
-};
