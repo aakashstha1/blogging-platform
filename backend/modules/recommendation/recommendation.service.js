@@ -18,6 +18,7 @@ const SIGNAL_WEIGHT = {
   comment: 1.8,
 };
 
+// --------------------------------- Build user profile ------------------------------------------------
 const toPlainVector = (mapOrObject) => {
   if (!mapOrObject) return {};
   // .lean() queries return plain objects already; hydrated Mongoose docs
@@ -48,6 +49,7 @@ const buildUserProfile = (viewedPosts, likedPosts, commentedPosts) => {
   return [...profile.values()];
 };
 
+// --------------------------------- Get recommended posts  ------------------------------------------------
 export const getRecommendedPostsService = async (userId, limit = 10) => {
   const [recentViews, recentLikes, recentComments] = await Promise.all([
     getRecentlyViewedPostsService(userId, RECENT_VIEWS_TO_CONSIDER),

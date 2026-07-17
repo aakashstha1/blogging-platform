@@ -5,6 +5,7 @@ dotenv.config({ quiet: true });
 
 import app from "./app.js";
 import connectDB from "./config/db-config.js";
+import { startVectorRefreshCron } from "./cron/vectorRefresh.cron.js";
 
 const server = http.createServer(app);
 
@@ -13,6 +14,8 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
     await connectDB();
+
+     startVectorRefreshCron();
 
     server.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);

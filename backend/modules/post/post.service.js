@@ -1,4 +1,5 @@
 import { deleteImageFromCloudinary } from "../../helper/cloudinaryDelete.js";
+import { updateSinglePostVectorService } from "../../services/vectorize.service.js";
 import { BadRequestError, NotFoundError } from "../../utils/errors.js";
 import Post from "./post.model.js";
 import slugify from "slugify";
@@ -19,7 +20,7 @@ export const createPostService = async (userId, postData, file) => {
   const slug = await buildUniqueSlug(postData.title);
 
   try {
-    return await Post.create({
+    const post = await Post.create({
       ...postData,
       slug,
       author: userId,
@@ -28,6 +29,13 @@ export const createPostService = async (userId, postData, file) => {
       status,
       publishedAt: status === "published" ? new Date() : null,
     });
+
+    // Generate vector in background
+    if (status === "published") {
+      await updateSinglePostVectorService(post._id).catch(console.error);
+    }
+
+    return post;
   } catch (error) {
     if (error.code === 11000 && error.keyPattern?.status) {
       throw new BadRequestError(DRAFT_LIMIT_MESSAGE);
@@ -106,10 +114,16 @@ export const updatePostService = async (post, updateData, file) => {
     updateData.coverImagePublicId = file.filename;
   }
 
-  return await Post.findByIdAndUpdate(post._id, updateData, {
+  const updatedPost = await Post.findByIdAndUpdate(post._id, updateData, {
     new: true,
     runValidators: true,
   });
+
+  if (updatedPost.status === "published") {
+    updateSinglePostVectorService(updatedPost._id).catch(console.error);
+  }
+
+  return updatedPost;
 };
 
 // --------------------------------------------- Delete a post by ID ---------------------------------------------
@@ -129,6 +143,7 @@ export const publishPostService = async (post) => {
   post.status = "published";
   post.publishedAt = new Date();
   await post.save();
+  updateSinglePostVectorService(post._id).catch(console.error);
   return post;
 };
 

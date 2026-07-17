@@ -1,5 +1,5 @@
 import Post from "../modules/post/post.model.js";
-import corpusStats from "../modules/corpusStats/corpusStats.model.js";
+import CorpusStats from "../modules/corpusStats/corpusStats.model.js";
 import {
   buildDocumentText,
   termFrequency,
@@ -24,9 +24,9 @@ const computeVectorFromTf = (tf, idf) => {
 // tfidfVector + vectorNorm using the fresh IDF. This is the only place that
 // does the expensive tokenize-everything work.
 export const refreshCorpusVectorsService = async () => {
-  const posts = await Post.find({ status: "published" }).select(
-    "title content categories",
-  );
+  const posts = await Post.find({ status: "published" })
+    .select("title content categories")
+    .populate("categories", "name");
 
   if (posts.length === 0) return { postsProcessed: 0 };
 
