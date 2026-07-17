@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
 
-const postLikedSchema = new mongoose.Schema(
+// ---------------------------------------------- Post Like ----------------------------------------------
+const postLikeSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-
     post: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Post",
@@ -17,18 +17,19 @@ const postLikedSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-postLikedSchema.index({ user: 1, post: 1 }, { unique: true });
+// A user can like a given post only once
+postLikeSchema.index({ user: 1, post: 1 }, { unique: true });
 
-export default mongoose.model("Liked", postLikedSchema);
+export const PostLike = mongoose.model("PostLike", postLikeSchema);
 
-const commentLikedSchema = new mongoose.Schema(
+// ---------------------------------------------- Comment Like ----------------------------------------------
+const commentLikeSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-
     comment: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Comment",
@@ -37,7 +38,8 @@ const commentLikedSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
-commentLikedSchema.index({ user: 1, comment: 1 }, { unique: true });
 
-export default mongoose.model("Liked", commentLikedSchema);
+// A user can like a given comment only once
+commentLikeSchema.index({ user: 1, comment: 1 }, { unique: true });
 
+export const CommentLike = mongoose.model("CommentLike", commentLikeSchema);
