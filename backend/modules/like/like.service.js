@@ -1,10 +1,6 @@
 import Post from "../post/post.model.js";
-<<<<<<< HEAD
-import Like from "./like.model.js";
-=======
 import Comment from "../comment/comment.model.js";
 import { PostLike, CommentLike } from "./like.model.js";
->>>>>>> 0742390384e91d8a90638f0975bd0563d6c54ff2
 import { BadRequestError, NotFoundError } from "../../utils/errors.js";
 
 // ---------------------------------------------- Post likes ----------------------------------------------
