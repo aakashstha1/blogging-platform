@@ -17,6 +17,7 @@ import {
   createCommentSchema,
   updateCommentSchema,
 } from "./comment.validation.js";
+import { commentRateLimiter } from "../../middlewares/rateLimiter.middleware.js";
 
 const router = express.Router();
 
@@ -32,6 +33,7 @@ router.post(
   "/posts/:postId",
   isAuthenticated,
   authorizeRoles("user", "admin"),
+  commentRateLimiter,
   validate(createCommentSchema),
   createComment,
 );
