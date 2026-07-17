@@ -59,7 +59,7 @@ export const getAllPostsService = async (query, user) => {
       .populate("author", "username")
       .populate("categories", "name")
       .populate("tags", "name")
-      .sort({ createdAt: -1 })
+      .sort({ publishedAt: -1 }, { createdAt: -1 })
       .skip(skip)
       .limit(limit),
     Post.countDocuments(filter),
