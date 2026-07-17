@@ -1,12 +1,9 @@
+import { getPostsCommentedByUserService } from "../comment/comment.service.js";
 import { getMyLikedPostsService } from "../like/like.service.js";
 import Post from "../post/post.model.js";
+import { getTrendingPostsService } from "../trending/trending.service.js";
 import { getRecentlyViewedPostsService } from "../view/view.service.js";
-
-import {
-  buildDocumentText,
-  buildCorpusVectors,
-  cosineSimilarity,
-} from "./recommendation.tfidf.js";
+import { buildCorpusVectors, buildDocumentText, cosineSimilarity } from "./recommendation.tfidf.js";
 
 // How much of each source of interest to pull for the profile.
 const RECENT_VIEWS_TO_CONSIDER = 10;
