@@ -19,10 +19,9 @@ export const createCommentService = async (userId, commentData) => {
   return comment;
 };
 
-
 export const updateCommentByIdService = async (commentId, updateData) => {
   const comment = await Comment.findByIdAndUpdate(commentId, updateData, {
-   returnDocument: "after",
+    returnDocument: "after",
     runValidators: true,
   });
   if (!comment) throw new NotFoundError("Comment not found");
@@ -86,3 +85,11 @@ export const getCommentCountByPostIdService = (postId) =>
 
 export const getCommentCountByParentCommentIdService = (parentCommentId) =>
   Comment.countDocuments({ parentComment: parentCommentId });
+
+export const getCommentCountsForPostsService = async (postIds) => {
+  const counts = await Comment.aggregate([
+    { $match: { post: { $in: postIds } } },
+    { $group: { _id: "$post", count: { $sum: 1 } } },
+  ]);
+  return Object.fromEntries(counts.map((c) => [c._id.toString(), c.count]));
+};
