@@ -9,7 +9,6 @@ import {
   getCommentById,
   getCommentCountForParentComment,
   getCommentCountForPost,
-  getComments,
   getCommentsByPostId,
   getCommentsByUserId,
   updateComment,
@@ -22,15 +21,14 @@ import {
 const router = express.Router();
 
 // Reads are public — comments on a published post should be guest-visible
-router.get("/", getComments);
-router.get("/:id", getCommentById);
-router.get("/post/:id", isAuthenticated, getCommentsByPostId);
-router.get("/user/:id", isAuthenticated, getCommentsByUserId);
-router.get("/post/:id/count", getCommentCountForPost);
-router.get("/post/comment/:id/count", getCommentCountForParentComment);
+router.get("/post/:postId/count", getCommentCountForPost);
+router.get("/comment/:commentId/count", getCommentCountForParentComment);
+router.get("/posts/:postId/comments", getCommentsByPostId);
+router.get("/user/comments", isAuthenticated, getCommentsByUserId);
+router.get("/:commentId", getCommentById);
 
 router.post(
-  "/",
+  "/posts/:postId/comments",
   isAuthenticated,
   authorizeRoles("user", "admin"),
   validate(createCommentSchema),
@@ -38,12 +36,12 @@ router.post(
 );
 
 router.patch(
-  "/:id",
+  "/:commentId",
   isAuthenticated,
   validate(updateCommentSchema),
   updateComment,
 );
 
-router.delete("/:id", isAuthenticated, deleteComment);
+router.delete("/:commentId", isAuthenticated, deleteComment);
 
 export default router;

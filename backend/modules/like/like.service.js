@@ -1,4 +1,4 @@
-import Post from "../posts/post.model.js";
+import Post from "../post/post.model.js";
 import Like from "./like.model.js";
 import { BadRequestError, NotFoundError } from "../../utils/errors.js";
 

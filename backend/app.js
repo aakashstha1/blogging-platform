@@ -28,7 +28,7 @@ app.use("/api/v1/posts", postRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/tags", tagRoutes);
 app.use("/api/v1/likes", likeRoutes);
-app.use("/api/v1/comments", commentRoutes);
+app.use("/api/v1", commentRoutes);
 
 app.use(errorHandler);
 
