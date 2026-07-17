@@ -53,7 +53,7 @@ const paginatedFind = async (filter, query) => {
     Comment.find(filter)
       .populate("user", "username avatar")
       .populate("post", "title slug")
-      .sort({ createdAt: -1 })
+      .sort({ publishedAt: -1 })
       .skip(skip)
       .limit(limit),
     Comment.countDocuments(filter),
@@ -92,4 +92,23 @@ export const getCommentCountsForPostsService = async (postIds) => {
     { $group: { _id: "$post", count: { $sum: 1 } } },
   ]);
   return Object.fromEntries(counts.map((c) => [c._id.toString(), c.count]));
+};
+export const getPostsCommentedByUserService = async (userId, limit = 50) => {
+  const comments = await Comment.find({ user: userId })
+    .sort({ publishedAt: -1 })
+    .limit(limit)
+    .populate("post");
+
+  // Dedupe: a user may have commented multiple times on the same post
+  const seen = new Set();
+  const posts = [];
+  for (const comment of comments) {
+    if (!comment.post) continue; // post may have been deleted since
+    const id = comment.post._id.toString();
+    if (!seen.has(id)) {
+      seen.add(id);
+      posts.push(comment.post);
+    }
+  }
+  return posts;
 };
