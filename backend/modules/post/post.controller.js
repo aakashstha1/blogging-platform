@@ -2,11 +2,11 @@ import {
   checkOwnership,
   checkOwnershipOrAdmin,
 } from "../../helper/checkOwnership.js";
+import { recordViewService } from "../view/view.service.js";
 import {
   createPostService,
   getAllPostsService,
   getPostByIdService,
-  incrementViewCountService,
   updatePostService,
   deletePostService,
   publishPostService,
@@ -36,7 +36,7 @@ export const getAllPosts = async (req, res, next) => {
 export const getPostById = async (req, res, next) => {
   try {
     const post = await getPostByIdService(req.params.id, req.user);
-    incrementViewCountService(post._id).catch(() => {}); // fire-and-forget
+    recordViewService(req.user?._id, result.post._id).catch(() => {});
     res.status(200).json(post);
   } catch (error) {
     next(error);
