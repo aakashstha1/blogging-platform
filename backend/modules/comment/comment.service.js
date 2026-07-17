@@ -19,11 +19,10 @@ export const createCommentService = async (userId, commentData) => {
   return comment;
 };
 
-// Ownership/role checks happen in the controller before this runs — this
-// function assumes the caller has already been authorized.
+
 export const updateCommentByIdService = async (commentId, updateData) => {
   const comment = await Comment.findByIdAndUpdate(commentId, updateData, {
-    new: true,
+   returnDocument: "after",
     runValidators: true,
   });
   if (!comment) throw new NotFoundError("Comment not found");

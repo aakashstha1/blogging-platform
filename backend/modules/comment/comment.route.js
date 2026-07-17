@@ -21,19 +21,22 @@ import {
 const router = express.Router();
 
 // Reads are public — comments on a published post should be guest-visible
-router.get("/post/:postId/count", getCommentCountForPost);
-router.get("/comment/:commentId/count", getCommentCountForParentComment);
-router.get("/posts/:postId/comments", getCommentsByPostId);
-router.get("/user/comments", isAuthenticated, getCommentsByUserId);
-router.get("/:commentId", getCommentById);
+router.get("/posts/:postId/count", getCommentCountForPost);
+router.get("/posts/:postId", getCommentsByPostId);
+router.get("/:commentId/replies/count", getCommentCountForParentComment);
+
+// "My own comments" — self-scoped, requires login
+router.get("/me", isAuthenticated, getCommentsByUserId);
 
 router.post(
-  "/posts/:postId/comments",
+  "/posts/:postId",
   isAuthenticated,
   authorizeRoles("user", "admin"),
   validate(createCommentSchema),
   createComment,
 );
+
+router.get("/:commentId", getCommentById);
 
 router.patch(
   "/:commentId",
