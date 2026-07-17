@@ -99,25 +99,3 @@ export const uploadRateLimiter = rateLimit({
     message: "Upload limit exceeded. Please try again later.",
   },
 });
-
-// --------------------------------------------- Search ---------------------------------------------
-export const searchRateLimiter = rateLimit({
-  ...defaultConfig,
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: {
-    success: false,
-    message: "Too many search requests. Please try again later.",
-  },
-});
-
-// --------------------------------------------- Recommendations ---------------------------------------------
-export const recommendationRateLimiter = rateLimit({
-  ...defaultConfig,
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: {
-    success: false,
-    message: "Too many recommendation requests. Please try again later.",
-  },
-});
