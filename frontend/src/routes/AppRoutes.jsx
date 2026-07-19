@@ -1,0 +1,32 @@
+import { Routes, Route } from "react-router-dom";
+// import MainLayout from "@/components/layout/MainLayout";
+
+// import Home from "@/pages/Home";
+// import Signup from "@/pages/auth/Signup";
+// import Dashboard from "@/pages/Dashboard";
+// import NotFound from "@/pages/NotFound";
+import Login from "@/pages/Login";
+import ProtectedRoute from "./ProtectedRoutes";
+
+export default function AppRoutes() {
+  return (
+    <Routes>
+      {/* Public routes, no Navbar (auth pages are full-screen) */}
+      <Route path="/login" element={<Login/>} />
+      {/* <Route path="/signup" element={<Signup />} /> */}
+
+      {/* Routes with the shared Navbar layout */}
+      {/* <Route element={<MainLayout />}>
+        <Route path="/" element={<Home />} /> */}
+
+        {/* Anything nested here requires a logged-in user */}
+         <Route element={<ProtectedRoute />}> 
+          {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+          {/* <Route path="/profile" element={<Profile />} /> */}
+        </Route> 
+      {/* </Route> */}
+
+      {/* <Route path="*" element={<NotFound />} /> */}
+    </Routes>
+  );
+}
