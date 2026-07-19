@@ -8,17 +8,17 @@ const defaultConfig = {
 // --------------------------------------------- Auth ---------------------------------------------
 export const loginRateLimiter = rateLimit({
   ...defaultConfig,
-  windowMs: 15 * 60 * 1000, // 15 min
-  max: 5,
+  windowMs: 2 * 60 * 1000,
+  max: 10,
   message: {
     success: false,
-    message: "Too many login attempts. Please try again in 15 minutes.",
+    message: "Too many login attempts. Please try again in 2 minutes.",
   },
 });
 
 export const registerRateLimiter = rateLimit({
   ...defaultConfig,
-  windowMs: 60 * 60 * 1000, // 1 hour
+  windowMs: 2 * 60 * 1000, // 1 hour
   max: 10,
   message: {
     success: false,
@@ -39,7 +39,7 @@ export const refreshTokenRateLimiter = rateLimit({
 // --------------------------------------------- Posts ---------------------------------------------
 export const createPostRateLimiter = rateLimit({
   ...defaultConfig,
-  windowMs: 60 * 60 * 1000, // 1 hour
+  windowMs: 30 * 60 * 1000, // 1 hour
   max: 10,
   message: {
     success: false,
