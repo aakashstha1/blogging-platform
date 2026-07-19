@@ -27,6 +27,7 @@ import {
   User,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
@@ -75,9 +76,7 @@ function NavLink({ label, href, active }) {
 export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
-  // Demo toggle only — swap for real auth state (context/redux) once the
-  // backend is wired up.
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { user, isAuthenticated } = useAuth();
   const activePath = "/";
 
   return (

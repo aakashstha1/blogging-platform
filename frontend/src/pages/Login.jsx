@@ -2,11 +2,11 @@ import LoginForm from "@/components/form/LoginForm";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const { login } = useAuth();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -15,7 +15,7 @@ export default function Login() {
     setLoading(true);
     try {
       await login(form);
-      // navigate("/");
+      navigate("/");
     } catch (err) {
       setError(
         err?.response?.data?.message ||
