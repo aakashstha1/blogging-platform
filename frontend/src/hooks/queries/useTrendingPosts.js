@@ -1,4 +1,4 @@
-import { getTrendingPosts } from "@/api/trendingPostAPi";
+import { getTrendingPosts } from "@/api/trendingPostApi";
 import { useQuery } from "@tanstack/react-query";
 
 export const useTrendingPosts = () => {
