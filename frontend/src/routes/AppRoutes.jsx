@@ -8,17 +8,21 @@ import ProtectedRoute from "./ProtectedRoutes";
 import Register from "@/pages/Register";
 import MainLayout from "@/layouts/MainLayout";
 import LandingPage from "@/pages/home/LandingPage";
+import MyFeed from "@/pages/home/MyFeed";
 
 export default function AppRoutes() {
   return (
     <Routes>
       {/* Public routes, no Navbar (auth pages are full-screen) */}
+
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Register />} />
 
       {/* Routes with the shared Navbar layout */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<LandingPage />} />
+
+        <Route path="/feeds" element={<MyFeed />} />
 
         {/* Anything nested here requires a logged-in user */}
         <Route element={<ProtectedRoute />}>

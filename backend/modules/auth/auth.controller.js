@@ -28,7 +28,7 @@ export const login = async (req, res, next) => {
 
     sendAuthCookies(res, accessToken, refreshToken);
 
-    res.status(200).json({ message: "Logged in successfully" });
+    res.status(200).json({ message: "Logged in successfully", user });
   } catch (error) {
     next(error);
   }

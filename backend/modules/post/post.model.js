@@ -80,7 +80,11 @@ const postSchema = new mongoose.Schema(
       default: 0,
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 );
 
 postSchema.index({ title: "text", content: "text" });
@@ -89,5 +93,19 @@ postSchema.index(
   { author: 1, status: 1 },
   { unique: true, partialFilterExpression: { status: "draft" } },
 );
+
+postSchema.virtual("commentsCount", {
+  ref: "Comment",
+  localField: "_id",
+  foreignField: "post",
+  count: true,
+});
+
+postSchema.virtual("likesCount", {
+  ref: "PostLike",
+  localField: "_id",
+  foreignField: "post",
+  count: true,
+});
 
 export default mongoose.model("Post", postSchema);

@@ -63,20 +63,20 @@ function InkUnderline({ active }) {
 
 function NavLink({ label, href, active }) {
   return (
-    <a
-      href={href}
+    <Link
+      to={href}
       className="group relative px-1 py-2 text-[15px] font-medium text-[#1C2321]/80 transition-colors hover:text-[#1C2321]"
     >
       {label}
       <InkUnderline active={active} />
-    </a>
+    </Link>
   );
 }
 
 export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const activePath = "/";
 
   return (
@@ -89,7 +89,7 @@ export default function Navbar() {
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
         {/* Logo / Wordmark */}
-        <a href="/" className="flex shrink-0 items-center gap-2">
+        <Link to="/" className="flex shrink-0 items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1F5F5B] text-[#FAFAF8]">
             <Feather className="h-4 w-4" />
           </span>
@@ -101,7 +101,7 @@ export default function Navbar() {
           >
             Quill
           </span>
-        </a>
+        </Link>
 
         {/* Desktop nav links */}
         <nav className="hidden md:flex md:items-center md:gap-7">
@@ -153,7 +153,7 @@ export default function Navbar() {
 
           {/* Auth area */}
           {isAuthenticated ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-6">
               <Button
                 variant="outline"
                 size="sm"
@@ -163,15 +163,13 @@ export default function Navbar() {
                 Write
               </Button>
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="rounded-full outline-none ring-[#1F5F5B] focus-visible:ring-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="" alt="User avatar" />
-                      <AvatarFallback className="bg-[#1F5F5B] text-xs text-white">
-                        JD
-                      </AvatarFallback>
-                    </Avatar>
-                  </button>
+                <DropdownMenuTrigger>
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src="" alt="User avatar" />
+                    <AvatarFallback className="bg-[#1F5F5B] text-white text-lg">
+                      {user.username.slice(0, 1).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem>
@@ -182,7 +180,7 @@ export default function Navbar() {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={() => setIsAuthenticated(false)}
+                    onClick={logout}
                     className="text-red-600 focus:text-red-600"
                   >
                     <LogOut className="mr-2 h-4 w-4" /> Log out
@@ -199,7 +197,6 @@ export default function Navbar() {
               </Link>
               <Button
                 size="sm"
-                onClick={() => setIsAuthenticated(true)}
                 className="bg-[#1F5F5B] text-white hover:bg-[#1F5F5B]/90"
               >
                 Get started
@@ -216,12 +213,12 @@ export default function Navbar() {
               <div className="mt-8 flex flex-col gap-1">
                 {NAV_LINKS.map((link) => (
                   <SheetClose asChild key={link.href}>
-                    <a
-                      href={link.href}
+                    <Link
+                      to={link.href}
                       className="rounded-md px-3 py-2.5 text-base font-medium text-[#1C2321] hover:bg-[#E8E4DC]/60"
                     >
                       {link.label}
-                    </a>
+                    </Link>
                   </SheetClose>
                 ))}
                 <div className="my-3 h-px bg-[#E8E4DC]" />
@@ -236,10 +233,7 @@ export default function Navbar() {
                 ) : (
                   <div className="flex flex-col gap-2 px-1">
                     <Button variant="outline">Log in</Button>
-                    <Button
-                      onClick={() => setIsAuthenticated(true)}
-                      className="bg-[#1F5F5B] text-white hover:bg-[#1F5F5B]/90"
-                    >
+                    <Button className="bg-[#1F5F5B] text-white hover:bg-[#1F5F5B]/90">
                       Get started
                     </Button>
                   </div>

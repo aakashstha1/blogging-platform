@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (userData) => {
     const { data } = await api.post("/auth/login", userData);
+    console.log(data);
     setUser(data.user);
     return data.user;
   };

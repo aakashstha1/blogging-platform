@@ -59,20 +59,15 @@ export const getAllPostsService = async (query, user) => {
     filter.$or = [{ status: "published" }, { author: user._id }];
   }
 
-  const category = await Category.findOne({
-    slug: query.category,
-  });
-
-  if (!category) {
-    return {
-      posts: [],
-      page: 1,
-      totalPages: 1,
-      totalPosts: 0,
-    };
+  // Only look up + filter by category if one was actually requested
+  if (query.category) {
+    const category = await Category.findOne({ slug: query.category });
+    if (!category) {
+      return { posts: [], page: 1, totalPages: 1, totalPosts: 0 };
+    }
+    filter.categories = category._id;
   }
 
-  filter.categories = category._id;
   if (query.search) filter.$text = { $search: query.search };
   if (query.status && user?.role === "admin") filter.status = query.status;
 
@@ -80,10 +75,14 @@ export const getAllPostsService = async (query, user) => {
     .populate("author", "username")
     .populate("categories", "name")
     .populate("tags", "name")
+    .populate("commentsCount")
+    .populate("likesCount")
     .skip(skip)
     .limit(limit);
 
   if (query.search) {
+    // Must project the score to be able to sort by it
+    findQuery.select({ score: { $meta: "textScore" } });
     findQuery.sort({ score: { $meta: "textScore" } });
   } else {
     findQuery.sort({ publishedAt: -1, createdAt: -1 });
