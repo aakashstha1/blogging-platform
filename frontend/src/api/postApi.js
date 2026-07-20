@@ -9,3 +9,4 @@ export const getPostBySlug = async (slug) => {
   const { data } = await api.get(`/posts/${slug}`);
   return data;
 };
+
