@@ -12,6 +12,7 @@ import MyFeed from "@/pages/home/MyFeed";
 import TrendingPosts from "@/pages/TrendingPosts";
 import RecommendedPosts from "@/pages/RecommendedPosts";
 import Profile from "@/pages/Profile";
+import SinglePost from "../components/common/SinglePost";
 
 export default function AppRoutes() {
   return (
@@ -30,6 +31,7 @@ export default function AppRoutes() {
           <Route path="/feeds" element={<MyFeed />} />
           <Route path="/trending" element={<TrendingPosts />} />
           <Route path="/recommended" element={<RecommendedPosts />} />
+          <Route path="/posts/:slug" element={<SinglePost />} />
           {/* <Route path="/dashboard" element={<Dashboard />} /> */}
           <Route path="/profile" element={<Profile />} />
         </Route>

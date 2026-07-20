@@ -19,8 +19,6 @@ import {
   Feather,
   Search,
   Menu,
-  Moon,
-  Sun,
   PenLine,
   LayoutDashboard,
   LogOut,
@@ -75,19 +73,12 @@ function NavLink({ label, href, active }) {
 
 export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
   const activePath = location.pathname;
 
   return (
-    <header
-      className={
-        isDark
-          ? "dark border-b border-[#2A312E] bg-[#14181C]"
-          : "border-b border-[#E8E4DC] bg-[#FAFAF8]"
-      }
-    >
+    <header className="border-b border-[#E8E4DC] bg-[#FAFAF8]">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
         {/* Logo / Wordmark */}
         <Link to="/" className="flex shrink-0 items-center gap-2">
@@ -95,9 +86,7 @@ export default function Navbar() {
             <Feather className="h-4 w-4" />
           </span>
           <span
-            className={`text-xl tracking-tight ${
-              isDark ? "text-[#FAFAF8]" : "text-[#1C2321]"
-            }`}
+            className="text-xl tracking-tight"
             style={{ fontFamily: "'Fraunces', Georgia, serif" }}
           >
             Quill
@@ -137,20 +126,6 @@ export default function Navbar() {
               </Button>
             )}
           </div>
-
-          {/* Theme toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsDark((d) => !d)}
-            aria-label="Toggle theme"
-          >
-            {isDark ? (
-              <Sun className="h-[18px] w-[18px]" />
-            ) : (
-              <Moon className="h-[18px] w-[18px]" />
-            )}
-          </Button>
 
           {/* Auth area */}
           {isAuthenticated ? (

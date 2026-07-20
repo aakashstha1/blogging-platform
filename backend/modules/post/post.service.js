@@ -102,11 +102,32 @@ export const getAllPostsService = async (query, user) => {
 };
 
 // --------------------------------------------- Get a post by ID ---------------------------------------------
-export const getPostByIdService = async (postId, user = null) => {
-  const post = await Post.findById(postId)
-    .populate("author", "username")
+// export const getPostByIdService = async (postId, user = null) => {
+//   const post = await Post.findById(postId)
+//     .populate("author", "username")
+//     .populate("categories", "name")
+//     .populate("tags", "name");
+
+//   if (!post) throw new NotFoundError("Post not found");
+
+//   const isOwner = user && post.author._id.toString() === user._id.toString();
+//   const isAdmin = user?.role === "admin";
+//   if (post.status !== "published" && !isOwner && !isAdmin) {
+//     // 404, not 403 — don't reveal that a draft exists to non-owners
+//     throw new NotFoundError("Post not found");
+//   }
+
+//   return post;
+// };
+
+// --------------------------------------------- Get a post by slug ---------------------------------------------
+export const getPostBySlugService = async (slug, user = null) => {
+  const post = await Post.findOne({ slug })
+    .populate("author", "username avatar")
     .populate("categories", "name")
-    .populate("tags", "name");
+    .populate("tags", "name")
+    .populate("likesCount")
+    .populate("commentsCount");
 
   if (!post) throw new NotFoundError("Post not found");
 

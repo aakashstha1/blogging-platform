@@ -2,10 +2,10 @@ import express from "express";
 import {
   createPost,
   getAllPosts,
-  getPostById,
   updatePost,
   deletePost,
   publishPost,
+  getPostBySlug,
 } from "./post.controller.js";
 import { isAuthenticated } from "../../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../../middlewares/role.middleware.js";
@@ -22,7 +22,8 @@ import {
 const router = express.Router();
 
 router.get("/", getAllPosts);
-router.get("/:id", isAuthenticated, getPostById);
+// router.get("/:id", isAuthenticated, getPostById);
+router.get("/:slug", isAuthenticated, getPostBySlug);
 
 router.post(
   "/",

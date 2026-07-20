@@ -5,8 +5,12 @@ export const getPosts = async () => {
   return data;
 };
 
-export const getPostBySlug = async (slug) => {
+// export const getPostBySlug = async (slug) => {
+//   const { data } = await api.get(`/posts/${slug}`);
+//   return data;
+// };
+
+export const getSinglePost = async (slug) => {
   const { data } = await api.get(`/posts/${slug}`);
   return data;
 };
-

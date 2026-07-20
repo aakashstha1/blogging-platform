@@ -6,10 +6,10 @@ import { recordViewService } from "../view/view.service.js";
 import {
   createPostService,
   getAllPostsService,
-  getPostByIdService,
   updatePostService,
   deletePostService,
   publishPostService,
+  getPostBySlugService,
 } from "./post.service.js";
 
 // --------------------------------------------- Create a new post ---------------------------------------------
@@ -33,9 +33,19 @@ export const getAllPosts = async (req, res, next) => {
 };
 
 // --------------------------------------------- Get post by id ---------------------------------------------
-export const getPostById = async (req, res, next) => {
+// export const getPostById = async (req, res, next) => {
+//   try {
+//     const post = await getPostByIdService(req.params.id, req.user);
+//     recordViewService(req.user?._id, post._id).catch(() => {});
+//     res.status(200).json(post);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+export const getPostBySlug = async (req, res, next) => {
   try {
-    const post = await getPostByIdService(req.params.id, req.user);
+    const post = await getPostBySlugService(req.params.slug, req.user);
     recordViewService(req.user?._id, post._id).catch(() => {});
     res.status(200).json(post);
   } catch (error) {
