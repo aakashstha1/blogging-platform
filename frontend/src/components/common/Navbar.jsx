@@ -26,19 +26,20 @@ import {
   LogOut,
   User,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
 const NAV_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "Articles", href: "/articles" },
-  { label: "Categories", href: "/categories" },
+  { label: "My Feed", href: "/feeds" },
+  { label: "Trending", href: "/trending" },
+  { label: "Recommended", href: "/recommended" },
   { label: "About", href: "/about" },
 ];
 
 // Hand-drawn style ink-stroke underline that animates in on hover/active.
 // This is the one "signature" detail for the whole nav.
 function InkUnderline({ active }) {
+ 
   return (
     <svg
       viewBox="0 0 60 8"
@@ -77,7 +78,8 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
-  const activePath = "/";
+   const location = useLocation();
+   const activePath = location.pathname;
 
   return (
     <header
