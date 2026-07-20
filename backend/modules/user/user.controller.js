@@ -26,7 +26,7 @@ export const getUserById = async (req, res, next) => {
 export const updateUser = async (req, res, next) => {
   try {
     const user = await updateUserByIdService(req.user._id, req.body, req.file);
-    res.status(200).json(user);
+    res.status(200).json({ message: "Profile updated successfully", user });
   } catch (error) {
     next(error);
   }

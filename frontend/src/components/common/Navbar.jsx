@@ -39,7 +39,6 @@ const NAV_LINKS = [
 // Hand-drawn style ink-stroke underline that animates in on hover/active.
 // This is the one "signature" detail for the whole nav.
 function InkUnderline({ active }) {
- 
   return (
     <svg
       viewBox="0 0 60 8"
@@ -78,8 +77,8 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
-   const location = useLocation();
-   const activePath = location.pathname;
+  const location = useLocation();
+  const activePath = location.pathname;
 
   return (
     <header
@@ -167,7 +166,7 @@ export default function Navbar() {
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="" alt="User avatar" />
+                    <AvatarImage src={user?.avatar} alt="User avatar" />
                     <AvatarFallback className="bg-[#1F5F5B] text-white text-lg">
                       {user.username.slice(0, 1).toUpperCase()}
                     </AvatarFallback>
@@ -175,7 +174,9 @@ export default function Navbar() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem>
-                    <User className="mr-2 h-4 w-4" /> Profile
+                    <Link to="/profile" className="flex items-center">
+                      <User className="mr-2 h-4 w-4" /> Profile
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard

@@ -11,6 +11,7 @@ import LandingPage from "@/pages/home/LandingPage";
 import MyFeed from "@/pages/home/MyFeed";
 import TrendingPosts from "@/pages/TrendingPosts";
 import RecommendedPosts from "@/pages/RecommendedPosts";
+import Profile from "@/pages/Profile";
 
 export default function AppRoutes() {
   return (
@@ -24,14 +25,13 @@ export default function AppRoutes() {
       <Route element={<MainLayout />}>
         <Route path="/" element={<LandingPage />} />
 
-        <Route path="/feeds" element={<MyFeed />} />
-        <Route path="/trending" element={<TrendingPosts />} />
-        <Route path="/recommended" element={<RecommendedPosts />} />
-
         {/* Anything nested here requires a logged-in user */}
         <Route element={<ProtectedRoute />}>
+          <Route path="/feeds" element={<MyFeed />} />
+          <Route path="/trending" element={<TrendingPosts />} />
+          <Route path="/recommended" element={<RecommendedPosts />} />
           {/* <Route path="/dashboard" element={<Dashboard />} /> */}
-          {/* <Route path="/profile" element={<Profile />} /> */}
+          <Route path="/profile" element={<Profile />} />
         </Route>
       </Route>
 

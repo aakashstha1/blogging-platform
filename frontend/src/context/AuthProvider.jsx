@@ -20,6 +20,17 @@ export const AuthProvider = ({ children }) => {
     return data.user;
   };
 
+  const updateProfile = async (updates) => {
+    const isFormData = updates instanceof FormData;
+    const { data } = await api.patch("/users/profile", updates, {
+      headers: isFormData
+        ? { "Content-Type": "multipart/form-data" }
+        : undefined,
+    });
+    setUser(data.user);
+    return data.user;
+  };
+
   const logout = async () => {
     try {
       await api.post("/auth/logout");
@@ -50,6 +61,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     loading,
     register,
+    updateProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
