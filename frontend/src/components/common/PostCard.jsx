@@ -13,7 +13,6 @@ function initials(name = "") {
 }
 
 export default function PostCard({ post }) {
-  console.log(post);
   const {
     slug,
     title,

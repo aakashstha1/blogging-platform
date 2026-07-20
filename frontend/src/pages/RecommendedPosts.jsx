@@ -1,12 +1,12 @@
 import Pagination from "@/components/common/Pagination";
 import PostCard from "@/components/common/PostCard";
 import PostCardSkeleton from "@/components/common/PostCardSkeleton";
-import { useTrendingPosts } from "@/hooks/queries/useTrendingPosts";
+import { useRecommendedPosts } from "@/hooks/queries/useRecommendedPosts";
 import { useState } from "react";
 
-function TrendingPosts() {
+function RecommendedPosts() {
   const [page, setPage] = useState(1);
-  const { data, isLoading } = useTrendingPosts({ page, limit: 6 });
+  const { data, isLoading } = useRecommendedPosts({ page, limit: 6 });
   const posts = data?.posts ?? [];
 
   function handlePageChange(nextPage) {
@@ -44,5 +44,4 @@ function TrendingPosts() {
     </div>
   );
 }
-
-export default TrendingPosts;
+export default RecommendedPosts;

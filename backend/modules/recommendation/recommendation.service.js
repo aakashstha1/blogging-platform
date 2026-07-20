@@ -50,7 +50,15 @@ const buildUserProfile = (viewedPosts, likedPosts, commentedPosts) => {
 };
 
 // --------------------------------- Get recommended posts  ------------------------------------------------
-export const getRecommendedPostsService = async (userId, limit = 10) => {
+
+export const getRecommendedPostsService = async (
+  userId,
+  page = 1,
+  limit = 10,
+) => {
+  page = Math.max(Number(page) || 1, 1);
+  limit = Math.min(Math.max(Number(limit) || 10, 1), 50);
+
   const [recentViews, recentLikes, recentComments] = await Promise.all([
     getRecentlyViewedPostsService(userId, RECENT_VIEWS_TO_CONSIDER),
     getMyLikedPostsService(userId, RECENT_LIKES_TO_CONSIDER),
@@ -62,20 +70,14 @@ export const getRecommendedPostsService = async (userId, limit = 10) => {
   const commentedPosts = recentComments;
 
   const profile = buildUserProfile(viewedPosts, likedPosts, commentedPosts);
+
   const profilePostIds = new Set(profile.map((p) => p.post._id.toString()));
 
-  // No engagement (or engagement only on posts without a vector yet, e.g.
-  // brand new) — fall back to trending.
+  // Fallback: no engagement history
   if (profile.length === 0) {
-    const trending = await getTrendingPostsService(limit);
-    return trending.map((t) => t.post);
+    return getTrendingPostsService(page, limit);
   }
 
-  // Narrow the candidate pool to posts sharing at least one category with
-  // the user's profile — most posts outside these categories are extremely
-  // unlikely to be good recommendations anyway, and this keeps the query
-  // (and the number of similarity comparisons) small regardless of total
-  // corpus size.
   const profileCategoryIds = [
     ...new Set(
       profile.flatMap((p) =>
@@ -87,25 +89,26 @@ export const getRecommendedPostsService = async (userId, limit = 10) => {
   const candidateFilter = {
     status: "published",
     _id: { $nin: [...profilePostIds] },
-    vectorNorm: { $gt: 0 }, // only posts that actually have a vector computed
+    vectorNorm: { $gt: 0 },
   };
+
   if (profileCategoryIds.length > 0) {
-    candidateFilter.categories = { $in: profileCategoryIds };
+    candidateFilter.categories = {
+      $in: profileCategoryIds,
+    };
   }
 
-  // .lean() — we only need plain data for math, no need to hydrate full
-  // Mongoose documents. Also no `content` field selected at all here.
   const candidates = await Post.find(candidateFilter)
     .select(
-      "title slug coverImage viewsCount publishedAt author categories tfidfVector vectorNorm",
+      "title slug coverImage content viewsCount publishedAt author categories tfidfVector vectorNorm",
     )
     .populate("author", "username")
     .populate("categories", "name")
     .lean();
 
+  // Fallback: no candidate posts
   if (candidates.length === 0) {
-    const trending = await getTrendingPostsService(limit);
-    return trending.map((t) => t.post);
+    return getTrendingPostsService(page, limit);
   }
 
   const profileVectors = profile.map((p) => ({
@@ -116,30 +119,50 @@ export const getRecommendedPostsService = async (userId, limit = 10) => {
 
   const scored = candidates.map((post) => {
     const candidateVector = toPlainVector(post.tfidfVector);
-    const candidateNorm = post.vectorNorm;
 
     let bestScore = 0;
+
     for (const entry of profileVectors) {
       const similarity = cosineSimilarityWithNorms(
         entry.vector,
         entry.norm,
         candidateVector,
-        candidateNorm,
+        post.vectorNorm,
       );
-      const weighted = similarity * entry.weight;
-      if (weighted > bestScore) bestScore = weighted;
+
+      const weightedScore = similarity * entry.weight;
+
+      if (weightedScore > bestScore) {
+        bestScore = weightedScore;
+      }
     }
 
-    return { post, score: bestScore };
+    return {
+      ...post,
+      recommendationScore: bestScore,
+    };
   });
 
-  scored.sort((a, b) => b.score - a.score);
+  scored.sort((a, b) => b.recommendationScore - a.recommendationScore);
 
-  const meaningful = scored.filter((s) => s.score > 0);
+  const meaningful = scored.filter((post) => post.recommendationScore > 0);
+
+  // Fallback: no meaningful recommendations
   if (meaningful.length === 0) {
-    const trending = await getTrendingPostsService(limit);
-    return trending.map((t) => t.post);
+    return getTrendingPostsService(page, limit);
   }
 
-  return meaningful.slice(0, limit).map((s) => s.post);
+  const totalPosts = meaningful.length;
+  const totalPages = Math.ceil(totalPosts / limit) || 1;
+
+  const skip = (page - 1) * limit;
+
+  const posts = meaningful.slice(skip, skip + limit);
+
+  return {
+    posts,
+    page,
+    totalPages,
+    totalPosts,
+  };
 };
