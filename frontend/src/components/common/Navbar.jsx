@@ -130,14 +130,16 @@ export default function Navbar() {
           {/* Auth area */}
           {isAuthenticated ? (
             <div className="flex items-center gap-6">
-              <Button
-                variant="outline"
-                size="sm"
-                className="hidden items-center gap-1.5 border-[#1F5F5B]/30 text-[#1F5F5B] sm:flex"
-              >
-                <PenLine className="h-4 w-4" />
-                Write
-              </Button>
+              <Link to="/write" className="hidden sm:block">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="hidden items-center gap-1.5 border-[#1F5F5B]/30 text-[#1F5F5B] sm:flex"
+                >
+                  <PenLine className="h-4 w-4" />
+                  Write
+                </Button>
+              </Link>
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <Avatar className="h-8 w-8">
