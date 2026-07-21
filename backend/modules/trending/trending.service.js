@@ -28,7 +28,7 @@ export const getTrendingPostsService = async (page = 1, limit = 10) => {
     status: "published",
     publishedAt: { $gte: windowStart },
   })
-    .populate("author", "username")
+    .populate("author", "username avatar")
     .populate("categories", "name")
     .select(
       "title slug content coverImage viewsCount publishedAt author categories",

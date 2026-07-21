@@ -50,7 +50,7 @@ export default function PostCard({ post }) {
         {/* Header: avatar, username, time ago */}
         <div className="flex items-center gap-2.5">
           <Avatar className="h-8 w-8 shrink-0">
-            <AvatarImage src={author?.avatarUrl} alt={author?.username} />
+            <AvatarImage src={author?.avatar} alt={author?.username} />
             <AvatarFallback className="bg-[#1F5F5B] text-xs text-white">
               {initials(author?.username)}
             </AvatarFallback>
@@ -67,12 +67,16 @@ export default function PostCard({ post }) {
 
         {/* Title + truncated content */}
         <div className="flex flex-col gap-2">
-          <h3 className="line-clamp-2 font-heading text-2xl leading-snug text-[#1C2321] transition-colors group-hover:text-[#1F5F5B]">
+          <h3 className="line-clamp-2 font-heading text-2xl leading-snug  text-[#1C2321] transition-colors group-hover:text-[#1F5F5B]">
             {title}
           </h3>
-          <p className="line-clamp-3 font-body text-base leading-relaxed text-[#1C2321]/60">
-            {content}
-          </p>
+
+          <p
+            dangerouslySetInnerHTML={{
+              __html: content,
+            }}
+            className="line-clamp-3 font-body text-base leading-relaxed text-[#1C2321]/60"
+          />
         </div>
 
         {/* Like / comment / save, bottom row */}

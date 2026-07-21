@@ -102,7 +102,7 @@ export const getRecommendedPostsService = async (
     .select(
       "title slug coverImage content viewsCount publishedAt author categories tfidfVector vectorNorm",
     )
-    .populate("author", "username")
+    .populate("author", "username avatar")
     .populate("categories", "name")
     .lean();
 

@@ -14,14 +14,17 @@ import RecommendedPosts from "@/pages/RecommendedPosts";
 import Profile from "@/pages/Profile";
 import SinglePost from "../components/common/SinglePost";
 import CreatePost from "../pages/CreatePost";
+import PublicRoute from "./PublicRoutes";
 
 export default function AppRoutes() {
   return (
     <Routes>
       {/* Public routes, no Navbar (auth pages are full-screen) */}
 
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Register />} />
+      <Route element={<PublicRoute />}>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Register />} />
+      </Route>
 
       {/* Routes with the shared Navbar layout */}
       <Route element={<MainLayout />}>

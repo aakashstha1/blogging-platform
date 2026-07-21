@@ -11,6 +11,7 @@ import {
   getCommentCountForPost,
   getCommentsByPostId,
   getCommentsByUserId,
+  getRepliesForComment,
   updateComment,
 } from "./comment.controller.js";
 import {
@@ -24,6 +25,8 @@ const router = express.Router();
 // Reads are public — comments on a published post should be guest-visible
 router.get("/posts/:postId/count", getCommentCountForPost);
 router.get("/posts/:postId", getCommentsByPostId);
+router.get("/:commentId/replies", getRepliesForComment);
+
 router.get("/:commentId/replies/count", getCommentCountForParentComment);
 
 // "My own comments" — self-scoped, requires login

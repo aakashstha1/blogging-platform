@@ -12,6 +12,7 @@ import {
   getCommentsByUserIdService,
   getCommentCountByPostIdService,
   getCommentCountByParentCommentIdService,
+  getCommentsByParentCommentIdService,
 } from "./comment.service.js";
 
 export const createComment = async (req, res, next) => {
@@ -114,6 +115,18 @@ export const getCommentCountForParentComment = async (req, res, next) => {
     res
       .status(200)
       .json({ parentCommentId: req.params.commentId, commentCount: count });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getRepliesForComment = async (req, res, next) => {
+  try {
+    const result = await getCommentsByParentCommentIdService(
+      req.params.commentId,
+      req.query,
+    );
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }

@@ -2,6 +2,7 @@ import { deleteImageFromCloudinary } from "../../helper/cloudinaryDelete.js";
 import { updateSinglePostVectorService } from "../../services/vectorize.service.js";
 import { BadRequestError, NotFoundError } from "../../utils/errors.js";
 import Post from "./post.model.js";
+import { PostLike } from "../like/like.model.js";
 import Category from "../category/category.model.js";
 import slugify from "slugify";
 
@@ -72,7 +73,7 @@ export const getAllPostsService = async (query, user) => {
   if (query.status && user?.role === "admin") filter.status = query.status;
 
   const findQuery = Post.find(filter)
-    .populate("author", "username")
+    .populate("author", "username avatar")
     .populate("categories", "name")
     .populate("tags", "name")
     .populate("commentsCount")
@@ -133,12 +134,24 @@ export const getPostBySlugService = async (slug, user = null) => {
 
   const isOwner = user && post.author._id.toString() === user._id.toString();
   const isAdmin = user?.role === "admin";
+
   if (post.status !== "published" && !isOwner && !isAdmin) {
-    // 404, not 403 — don't reveal that a draft exists to non-owners
     throw new NotFoundError("Post not found");
   }
 
-  return post;
+  let isLiked = false;
+
+  if (user) {
+    isLiked = !!(await PostLike.exists({
+      user: user._id,
+      post: post._id,
+    }));
+  }
+
+  return {
+    ...post.toObject(),
+    isLiked,
+  };
 };
 
 // --------------------------------------------- Update a post by ID ---------------------------------------------

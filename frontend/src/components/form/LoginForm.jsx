@@ -71,12 +71,6 @@ function LoginForm({ onSubmit, loading = false, error = "" }) {
               <Label htmlFor="password" className="text-white/80">
                 Password
               </Label>
-              <a
-                href="/forgot-password"
-                className="text-xs text-white/60 hover:text-white"
-              >
-                Forgot password?
-              </a>
             </div>
             <div className="relative">
               <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
@@ -91,6 +85,7 @@ function LoginForm({ onSubmit, loading = false, error = "" }) {
                 onChange={handleChange}
                 className="border-white/15 bg-white/5 pl-9 pr-10 text-white placeholder:text-white/40 focus-visible:ring-white/30"
               />
+
               <button
                 type="button"
                 onClick={() => setShowPassword((s) => !s)}
@@ -104,6 +99,12 @@ function LoginForm({ onSubmit, loading = false, error = "" }) {
                 )}
               </button>
             </div>
+            <a
+              href="/forgot-password"
+              className="text-xs text-white/60 hover:text-white text-right"
+            >
+              Forgot password?
+            </a>
           </div>
 
           <Button

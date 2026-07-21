@@ -38,6 +38,15 @@ export const getPostLikeCountsService = async (postIds) => {
   return Object.fromEntries(counts.map((c) => [c._id.toString(), c.count]));
 };
 
+export const isPostLikedService = async (userId, postId) => {
+  const liked = await PostLike.exists({
+    user: userId,
+    post: postId,
+  });
+
+  return !!liked;
+};
+
 // ---------------------------------------------- Comment likes ----------------------------------------------
 export const createCommentLikeService = async (userId, commentId) => {
   const comment = await Comment.findById(commentId);

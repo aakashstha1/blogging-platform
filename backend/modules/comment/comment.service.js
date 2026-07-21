@@ -49,23 +49,38 @@ const paginate = (query) => {
 
 const paginatedFind = async (filter, query) => {
   const { page, limit, skip } = paginate(query);
+
   const [comments, total] = await Promise.all([
     Comment.find(filter)
       .populate("user", "username avatar")
       .populate("post", "title slug")
-      .sort({ publishedAt: -1 })
+      .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit),
+      .limit(limit)
+      .lean(),
     Comment.countDocuments(filter),
   ]);
+
+  const commentsWithCounts = await Promise.all(
+    comments.map(async (comment) => {
+      const repliesCount = await Comment.countDocuments({
+        parentComment: comment._id,
+      });
+
+      return {
+        ...comment,
+        repliesCount,
+      };
+    }),
+  );
+
   return {
-    comments,
+    comments: commentsWithCounts,
     page,
     totalPages: Math.ceil(total / limit) || 1,
     totalComments: total,
   };
 };
-
 export const getCommentsService = (query) => paginatedFind({}, query);
 
 export const getCommentsByUserIdService = (userId, query) =>

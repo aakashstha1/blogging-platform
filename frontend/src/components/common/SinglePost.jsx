@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Bookmark } from "lucide-react";
+import { Heart, MessageCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { formatTimeAgo } from "@/lib/timeFormat";
 import { Button } from "../ui/button";
@@ -8,14 +8,20 @@ import { Eye } from "lucide-react";
 import { useSinglePost } from "@/hooks/queries/useSinglePost";
 import { Skeleton } from "../ui/skeleton";
 import ScrollToTop from "./ScrollToTop";
+import CommentSection from "./CommentSection";
+import { useCreatePostLike } from "@/hooks/mutations/useCreatePostLike";
+import { useDeletePostLike } from "@/hooks/mutations/useDeletePostLike";
 
 export default function SinglePost() {
   const { slug } = useParams();
   const { data, isLoading } = useSinglePost(slug);
-  if (isLoading) {
-    SinglePostSkeleton();
-  }
 
+  const { mutate: likePost } = useCreatePostLike();
+  const { mutate: unlikePost } = useDeletePostLike();
+
+  if (isLoading) {
+    return <SinglePostSkeleton />;
+  }
   return (
     <>
       <ScrollToTop />
@@ -76,7 +82,7 @@ export default function SinglePost() {
           )}
 
           {/* Content */}
-          <div className="prose prose-lg max-w-none prose-img:rounded-xl">
+          <div className="prose prose-lg max-w-none prose-img:rounded-xl text-justify font-body prose-p:mb-4 leading-8">
             <div
               dangerouslySetInnerHTML={{
                 __html: data?.content,
@@ -90,20 +96,22 @@ export default function SinglePost() {
 
             <div className="flex items-center justify-between py-5">
               <div className="flex gap-3">
-                <Button variant="outline">
-                  <Heart />
-                  Like
-                </Button>
-
-                <Button variant="outline">
-                  <MessageCircle />
-                  Comment
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    data?.isLiked ? unlikePost(data._id) : likePost(data._id)
+                  }
+                >
+                  <Heart
+                    className={data?.isLiked ? "fill-red-500 text-red-500" : ""}
+                  />
+                  {data?.isLiked ? "Liked" : "Like"}
                 </Button>
               </div>
 
-              <Button variant="ghost">
+              {/* <Button variant="ghost">
                 <Bookmark />
-              </Button>
+              </Button> */}
             </div>
 
             <Separator />
@@ -116,6 +124,7 @@ export default function SinglePost() {
             </h2>
 
             {/* comment form */}
+            {data && <CommentSection postId={data._id} />}
 
             {/* comment list */}
           </section>
