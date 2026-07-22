@@ -2,7 +2,7 @@ import cron from "node-cron";
 import { refreshCorpusVectorsService } from "../services/vectorize.service.js";
 
 export const startVectorRefreshCron = () => {
-  cron.schedule("*/10 * * * *", async () => {
+  cron.schedule("0 0 * * * *", async () => {
     try {
       console.log("Refreshing corpus vectors...");
 
