@@ -103,23 +103,23 @@ export const getAllPostsService = async (query, user) => {
 };
 
 // --------------------------------------------- Get a post by ID ---------------------------------------------
-// export const getPostByIdService = async (postId, user = null) => {
-//   const post = await Post.findById(postId)
-//     .populate("author", "username")
-//     .populate("categories", "name")
-//     .populate("tags", "name");
+export const getPostByIdService = async (postId, user = null) => {
+  const post = await Post.findById(postId)
+    .populate("author", "username")
+    .populate("categories", "name")
+    .populate("tags", "name");
 
-//   if (!post) throw new NotFoundError("Post not found");
+  if (!post) throw new NotFoundError("Post not found");
 
-//   const isOwner = user && post.author._id.toString() === user._id.toString();
-//   const isAdmin = user?.role === "admin";
-//   if (post.status !== "published" && !isOwner && !isAdmin) {
-//     // 404, not 403 — don't reveal that a draft exists to non-owners
-//     throw new NotFoundError("Post not found");
-//   }
+  const isOwner = user && post.author._id.toString() === user._id.toString();
+  const isAdmin = user?.role === "admin";
+  if (post.status !== "published" && !isOwner && !isAdmin) {
+    // 404, not 403 — don't reveal that a draft exists to non-owners
+    throw new NotFoundError("Post not found");
+  }
 
-//   return post;
-// };
+  return post;
+};
 
 // --------------------------------------------- Get a post by slug ---------------------------------------------
 export const getPostBySlugService = async (slug, user = null) => {
@@ -230,4 +230,36 @@ const buildUniqueSlug = async (title, excludeId = null) => {
   const filter = excludeId ? { slug, _id: { $ne: excludeId } } : { slug };
   if (await Post.findOne(filter)) slug = `${slug}-${Date.now()}`;
   return slug;
+};
+
+// --------------------------------------------- Get my posts ---------------------------------------------
+export const getMyPostsService = async (userId, query) => {
+  const page = Math.max(parseInt(query.page) || 1, 1);
+  const limit = Math.min(parseInt(query.limit) || 10, 50);
+  const skip = (page - 1) * limit;
+
+  const filter = {
+    author: userId,
+  };
+
+  const [posts, total] = await Promise.all([
+    Post.find(filter)
+      .populate("author", "username avatar")
+      .populate("categories", "name")
+      .populate("tags", "name")
+      .populate("commentsCount")
+      .populate("likesCount")
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit),
+
+    Post.countDocuments(filter),
+  ]);
+
+  return {
+    posts,
+    page,
+    totalPages: Math.ceil(total / limit) || 1,
+    totalPosts: total,
+  };
 };

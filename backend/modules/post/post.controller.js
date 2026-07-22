@@ -10,6 +10,8 @@ import {
   deletePostService,
   publishPostService,
   getPostBySlugService,
+  getMyPostsService,
+  getPostByIdService,
 } from "./post.service.js";
 
 // --------------------------------------------- Create a new post ---------------------------------------------
@@ -33,15 +35,15 @@ export const getAllPosts = async (req, res, next) => {
 };
 
 // --------------------------------------------- Get post by id ---------------------------------------------
-// export const getPostById = async (req, res, next) => {
-//   try {
-//     const post = await getPostByIdService(req.params.id, req.user);
-//     recordViewService(req.user?._id, post._id).catch(() => {});
-//     res.status(200).json(post);
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+export const getPostById = async (req, res, next) => {
+  try {
+    const post = await getPostByIdService(req.params.id, req.user);
+    recordViewService(req.user?._id, post._id).catch(() => {});
+    res.status(200).json(post);
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getPostBySlug = async (req, res, next) => {
   try {
@@ -101,3 +103,9 @@ export const publishPost = async (req, res, next) => {
 //     next(error);
 //   }
 // };
+
+export const getMyPosts = async (req, res) => {
+  const result = await getMyPostsService(req.user._id, req.query);
+
+  res.status(200).json(result);
+};

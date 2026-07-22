@@ -15,6 +15,8 @@ import Profile from "@/pages/Profile";
 import SinglePost from "../components/common/SinglePost";
 import CreatePost from "../pages/CreatePost";
 import PublicRoute from "./PublicRoutes";
+import MyPosts from "@/pages/MyPosts";
+import EditPost from "@/pages/EditPost";
 
 export default function AppRoutes() {
   return (
@@ -37,8 +39,9 @@ export default function AppRoutes() {
           <Route path="/write" element={<CreatePost />} />
           <Route path="/recommended" element={<RecommendedPosts />} />
           <Route path="/posts/:slug" element={<SinglePost />} />
-          {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+          <Route path="/my-posts" element={<MyPosts />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/posts/edit/:slug" element={<EditPost />} />
         </Route>
       </Route>
 

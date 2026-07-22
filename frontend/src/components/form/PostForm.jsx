@@ -11,18 +11,22 @@ import {
 import { Loader2, ImagePlus, X } from "lucide-react";
 import TiptapEditor from "../common/TipTapEditor";
 
-export default function PostForm({ categories, tags, onSubmit }) {
+export default function PostForm({ categories, tags, onSubmit, initialData }) {
   const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
-    title: "",
-    content: "",
-    category: "",
+    title: initialData?.title || "",
+    content: initialData?.content || "",
+    category: initialData?.categories?.[0]?._id || "",
   });
 
   const [coverFile, setCoverFile] = useState(null);
-  const [coverPreview, setCoverPreview] = useState("");
-  const [selectedTagIds, setSelectedTagIds] = useState([]);
+  const [coverPreview, setCoverPreview] = useState(
+    initialData?.coverImage || "",
+  );
+  const [selectedTagIds, setSelectedTagIds] = useState(
+    initialData?.tags?.map((tag) => tag._id) || [],
+  );
   const [submitting, setSubmitting] = useState(null);
 
   const toggleTag = (tagId) => {
@@ -66,8 +70,13 @@ export default function PostForm({ categories, tags, onSubmit }) {
     }
   };
 
+  const isEditMode = !!initialData;
+
   return (
     <div className="flex flex-col gap-6 rounded-xl border border-[#E8E4DC] bg-white p-6 sm:p-8">
+      <h1 className="mb-6 text-3xl font-semibold">
+        {isEditMode ? "Edit Post" : "Write a new post"}
+      </h1>
       {/* Cover */}
       <div className="flex flex-col gap-1.5">
         <Label>Cover image</Label>
@@ -217,7 +226,7 @@ export default function PostForm({ categories, tags, onSubmit }) {
           {submitting === "published" && (
             <Loader2 className="h-4 w-4 animate-spin" />
           )}
-          Publish
+          {isEditMode ? "Update Post" : "Publish"}
         </Button>
       </div>
     </div>

@@ -6,6 +6,8 @@ import {
   deletePost,
   publishPost,
   getPostBySlug,
+  getMyPosts,
+  getPostById,
 } from "./post.controller.js";
 import { isAuthenticated } from "../../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../../middlewares/role.middleware.js";
@@ -22,8 +24,9 @@ import {
 const router = express.Router();
 
 router.get("/", getAllPosts);
-// router.get("/:id", isAuthenticated, getPostById);
-router.get("/:slug", isAuthenticated, getPostBySlug);
+router.get("/me", isAuthenticated, getMyPosts);
+router.get("/slug/:slug", isAuthenticated, getPostBySlug);
+router.get("/:id", isAuthenticated, getPostById);
 
 router.post(
   "/",

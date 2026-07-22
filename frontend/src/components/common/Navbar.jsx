@@ -20,7 +20,6 @@ import {
   Search,
   Menu,
   PenLine,
-  LayoutDashboard,
   LogOut,
   User,
 } from "lucide-react";
@@ -32,6 +31,7 @@ const NAV_LINKS = [
   { label: "Trending", href: "/trending" },
   { label: "Recommended", href: "/recommended" },
   { label: "About", href: "/about" },
+  { label: "My Posts", href: "/my-posts" },
 ];
 
 // Hand-drawn style ink-stroke underline that animates in on hover/active.
@@ -155,9 +155,7 @@ export default function Navbar() {
                       <User className="mr-2 h-4 w-4" /> Profile
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
-                  </DropdownMenuItem>
+
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={logout}

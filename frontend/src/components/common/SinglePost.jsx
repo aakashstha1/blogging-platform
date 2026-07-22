@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { formatTimeAgo } from "@/lib/timeFormat";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Eye } from "lucide-react";
 import { useSinglePost } from "@/hooks/queries/useSinglePost";
 import { Skeleton } from "../ui/skeleton";
@@ -11,13 +11,52 @@ import ScrollToTop from "./ScrollToTop";
 import CommentSection from "./CommentSection";
 import { useCreatePostLike } from "@/hooks/mutations/useCreatePostLike";
 import { useDeletePostLike } from "@/hooks/mutations/useDeletePostLike";
+import { MoreVertical } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { useDeletePost } from "@/hooks/mutations/useDeletePost";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
+import { useState } from "react";
 
 export default function SinglePost() {
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const navigate = useNavigate();
   const { slug } = useParams();
   const { data, isLoading } = useSinglePost(slug);
 
   const { mutate: likePost } = useCreatePostLike();
   const { mutate: unlikePost } = useDeletePostLike();
+  const { mutate: deletePost, isPending: isDeleting } = useDeletePost();
+
+  const { user } = useAuth();
+
+  const isOwner = user?._id === data?.author?._id;
+
+  const handleEdit = () => {
+    navigate(`/posts/edit/${data.slug}`);
+  };
+
+  const handleDelete = () => {
+    deletePost(data._id, {
+      onSuccess: () => {
+        navigate("/my-posts");
+      },
+    });
+  };
 
   if (isLoading) {
     return <SinglePostSkeleton />;
@@ -51,21 +90,44 @@ export default function SinglePost() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-5 text-sm text-[#1C2321]/60">
-                <span className="flex items-center gap-1">
-                  <Heart className="h-4 w-4" />
-                  {data?.likesCount}
-                </span>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-5 text-sm text-[#1C2321]/60">
+                  <span className="flex items-center gap-1">
+                    <Heart className="h-4 w-4" />
+                    {data?.likesCount}
+                  </span>
 
-                <span className="flex items-center gap-1">
-                  <MessageCircle className="h-4 w-4" />
-                  {data?.commentsCount}
-                </span>
+                  <span className="flex items-center gap-1">
+                    <MessageCircle className="h-4 w-4" />
+                    {data?.commentsCount}
+                  </span>
 
-                <span className="flex items-center gap-1">
-                  <Eye className="h-4 w-4" />
-                  {data?.viewsCount}
-                </span>
+                  <span className="flex items-center gap-1">
+                    <Eye className="h-4 w-4" />
+                    {data?.viewsCount}
+                  </span>
+                </div>
+
+                {isOwner && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <MoreVertical className="h-5 w-5 cursor-pointer" />
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={handleEdit}>
+                        Edit Post
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem
+                        className="text-red-500"
+                        onClick={() => setDeleteOpen(true)}
+                      >
+                        Delete Post
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </div>
           </header>
@@ -130,6 +192,29 @@ export default function SinglePost() {
           </section>
         </article>
       </div>
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this post?</AlertDialogTitle>
+
+            <AlertDialogDescription>
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
