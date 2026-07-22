@@ -2,11 +2,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function PublicRoute() {
-  const { isAuthenticated, loading } = useAuth();
-
-  if (loading) {
-    return <div className="p-8 text-center">Loading...</div>;
-  }
+  const { isAuthenticated } = useAuth();
 
   if (isAuthenticated) {
     return <Navigate to="/feeds" replace />;

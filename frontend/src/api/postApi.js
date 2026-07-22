@@ -46,3 +46,9 @@ export const deletePost = async (postId) => {
 
   return data;
 };
+
+export const getSearchedPosts = async (search = "") => {
+  const { data } = await api.get(`/posts?search=${encodeURIComponent(search)}`);
+
+  return data;
+};

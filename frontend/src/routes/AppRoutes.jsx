@@ -17,6 +17,9 @@ import CreatePost from "../pages/CreatePost";
 import PublicRoute from "./PublicRoutes";
 import MyPosts from "@/pages/MyPosts";
 import EditPost from "@/pages/EditPost";
+import SearchPage from "@/pages/SearchPage";
+import About from "@/pages/About";
+import GuestOnlyRoute from "./GuestOnlyRoutes";
 
 export default function AppRoutes() {
   return (
@@ -30,8 +33,9 @@ export default function AppRoutes() {
 
       {/* Routes with the shared Navbar layout */}
       <Route element={<MainLayout />}>
-        <Route path="/" element={<LandingPage />} />
-
+        <Route element={<GuestOnlyRoute />}>
+          <Route path="/" element={<LandingPage />} />
+        </Route>
         {/* Anything nested here requires a logged-in user */}
         <Route element={<ProtectedRoute />}>
           <Route path="/feeds" element={<MyFeed />} />
@@ -42,6 +46,8 @@ export default function AppRoutes() {
           <Route path="/my-posts" element={<MyPosts />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/posts/edit/:slug" element={<EditPost />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/about" element={<About />} />
         </Route>
       </Route>
 
