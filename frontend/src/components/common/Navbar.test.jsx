@@ -2,7 +2,6 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Navbar from "@/components/Navbar"; // adjust path if Navbar lives elsewhere
 
 // Mock the hooks Navbar depends on so this test doesn't need a real
 // backend, real auth state, or real network requests.
@@ -15,6 +14,7 @@ vi.mock("@/hooks/queries/useSearchPost", () => ({
 }));
 
 import { useAuth } from "@/hooks/useAuth";
+import Navbar from "./Navbar";
 
 // Navbar needs a Router (for Link/useLocation/useNavigate) and a
 // QueryClientProvider (for the useSearchPosts hook it renders internally).
