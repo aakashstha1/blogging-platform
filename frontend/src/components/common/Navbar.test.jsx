@@ -84,23 +84,14 @@ describe("Navbar", () => {
     );
   });
 
-  it('hides the desktop nav links on the landing page ("/")', () => {
-    useAuth.mockReturnValue({
-      isAuthenticated: false,
-      user: null,
-      logout: vi.fn(),
-    });
-
+  it("does not render nav links on landing page", () => {
     renderNavbar("/");
 
-    // On "/" the desktop <nav> is not rendered at all — but the mobile
-    // Sheet's link list is unconditional, so each label still appears
-    // exactly once (from the Sheet), not zero or two times.
-    ["My Feed", "Trending", "Recommended", "About", "My Posts"].forEach(
-      (label) => {
-        expect(screen.getAllByText(label)).toHaveLength(1);
-      },
-    );
+    expect(screen.queryByText("My Feed")).not.toBeInTheDocument();
+    expect(screen.queryByText("Trending")).not.toBeInTheDocument();
+    expect(screen.queryByText("Recommended")).not.toBeInTheDocument();
+    expect(screen.queryByText("About")).not.toBeInTheDocument();
+    expect(screen.queryByText("My Posts")).not.toBeInTheDocument();
   });
 
   it("renders one fewer button on the landing page (the hidden search toggle)", () => {
